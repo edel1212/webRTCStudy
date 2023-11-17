@@ -1,6 +1,6 @@
 # Room
 
-Zoom CLone using NodeJs, Web RTC
+Zoom Clone using NodeJs, Web RTC
 
 ## 기본 설치
 
