@@ -14,4 +14,7 @@ Zoom Clone using NodeJs, Web RTC
       - 브라우저 호환 같은 것도 해결해 줌!
       - Ts 변환도 가능함
 - `npm i express`
+  - node를 사용해서 서버를 구현 하게 해줌
 - `npm i pug`
+  - HTML 을 PUG 문법으로 작성하면 HTML 로 바꿔주는 기능을 한다.
+  - pug 는 express의 패키지 view engine이다.
