@@ -1,3 +1,4 @@
 {
+  // Babel이 사용할 preset(제어값)지정
   "presets": ["@babel/preset-env"]
 }
