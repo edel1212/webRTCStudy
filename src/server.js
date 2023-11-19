@@ -13,5 +13,7 @@ app.use("/public", express.static(__dirname + "/public"));
 
 // "/" path로 들어올 경우 해당 위의 경로의 home.pug파일을 불러와 Html 랜더링
 app.get("/", (req, res) => res.render("home"));
+// 모든 path redirect 시키기
+app.get("/*", (req, res) => res.redirect("/"));
 
 app.listen(3000); // port 설청
