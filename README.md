@@ -18,3 +18,14 @@ Zoom Clone using NodeJs, Web RTC
 - `npm i pug`
   - HTML 을 PUG 문법으로 작성하면 HTML 로 바꿔주는 기능을 한다.
   - pug 는 express의 패키지 view engine이다.
+
+### HTTP, WebSocket 차이
+
+- HTTP
+  - 요청 -> 응답 의 간단한 방식으로 동작한다
+  - Stateless 하다
+  - http or https 를 사용해서 요청 후 응답을 받는다.
+- WebSocket
+  - Client에서 WebSocket에 요청 -> Server에서 수락 후 연결이 시작된다.
+  - 양방향 연결의 연결이기 때문에 응답 요청 개념이 아닌 서로 교환 방식이 아닌 소통 개념으로 데이터를 주고 받는다.
+  - ws or wss르 를 사용해 소켓 연결 후 데이터를 주고 받는다.
