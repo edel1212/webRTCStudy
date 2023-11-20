@@ -29,3 +29,11 @@ Zoom Clone using NodeJs, Web RTC
   - Client에서 WebSocket에 요청 -> Server에서 수락 후 연결이 시작된다.
   - 양방향 연결의 연결이기 때문에 응답 요청 개념이 아닌 서로 교환 방식이 아닌 소통 개념으로 데이터를 주고 받는다.
   - ws or wss르 를 사용해 소켓 연결 후 데이터를 주고 받는다.
+
+### Websocket 설치
+
+- ws
+  - WebSoket의 core(중심)과도 같은 존재이다.
+  - 단 해당 library만으로는 채팅방과 같은 기능은 내가 만들어야함. 하지만 다른사람이 해당 라이브러리를 사용해 만든 Framework가 있음
+  - 설치
+    - `npm i ws`

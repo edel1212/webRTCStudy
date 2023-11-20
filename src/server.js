@@ -1,4 +1,8 @@
+// ⭐ "http"는 Nodeks에 기본적으로 설치되어 있음
+import http from "http";
 import express from "express";
+//  💬 ws 사용을 위한 import
+import WebSocket from "ws";
 
 const app = express();
 
@@ -16,4 +20,16 @@ app.get("/", (req, res) => res.render("home"));
 // 모든 path redirect 시키기
 app.get("/*", (req, res) => res.redirect("/"));
 
-app.listen(3000); // port 설청
+// 💬 웹 소캣을 사용하기 위해 서버를 생성함
+const server = http.createServer(app);
+
+// 💬 굳이 파라미터로 server를 넘겨줄필요가 없지만 넘겨주는 이유는
+//    이런식으로 해야 http서버와 websocket서버를 동시에 사용이 가능함
+//    두개의 프로토콜 기능이 같은 포트에서 작동하기를 위해 이렇게 하는것임! 필수가 아니다 절대로!!
+//    - 구조 :: Hppt서버 위에  (server 변수) Socket용 서버(wss 변수)를 올린 것이다.
+const wss = new WebSocket.Server({ server });
+
+const handleListen = () => console.log(`Listen on http://localhost:3000`);
+
+// 포트 설정
+server.listen(3000, handleListen);
