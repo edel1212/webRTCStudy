@@ -33,7 +33,32 @@ Zoom Clone using NodeJs, Web RTC
 ### Websocket 설치
 
 - ws
+
   - WebSoket의 core(중심)과도 같은 존재이다.
   - 단 해당 library만으로는 채팅방과 같은 기능은 내가 만들어야함. 하지만 다른사람이 해당 라이브러리를 사용해 만든 Framework가 있음
   - 설치
     - `npm i ws`
+  - 적용 코드
+
+    ```javascript
+    import http from "http";
+    import express from "express";
+    //  💬 ws 사용을 위한 import
+    import WebSocket from "ws";
+
+    const app = express();
+
+    // 💬 http서버를 생성 - websocket을 함께 사용하기위해 생성함
+    const server = http.createServer(app);
+
+    // 💬 굳이 파라미터로 server를 넘겨줄필요가 없지만 넘겨주는 이유는
+    //    이런식으로 해야 http서버와 websocket서버를 동시에 사용이 가능함
+    //    두개의 프로토콜 기능이 같은 포트에서 작동하기를 위해 이렇게 하는것임! 필수가 아니다 절대로!!
+    //    - 구조 :: Hppt서버 위에  (server 변수) Socket용 서버(wss 변수)를 올린 것이다.
+    const wss = new WebSocket.Server({ server });
+
+    const handleListen = () => console.log(`Listen on http://localhost:3000`);
+
+    // 포트 설정
+    server.listen(3000, handleListen);
+    ```

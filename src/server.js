@@ -20,7 +20,7 @@ app.get("/", (req, res) => res.render("home"));
 // 모든 path redirect 시키기
 app.get("/*", (req, res) => res.redirect("/"));
 
-// 💬 웹 소캣을 사용하기 위해 서버를 생성함
+// 💬 http서버를 생성 - websocket을 함께 사용하기위해 생성함
 const server = http.createServer(app);
 
 // 💬 굳이 파라미터로 server를 넘겨줄필요가 없지만 넘겨주는 이유는
