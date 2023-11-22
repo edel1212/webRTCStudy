@@ -29,6 +29,11 @@ const server = http.createServer(app);
 //    - 구조 :: Hppt서버 위에  (server 변수) Socket용 서버(wss 변수)를 올린 것이다.
 const wss = new WebSocket.Server({ server });
 
+wss.on("connection", (socket) => {
+  console.log("!!!!!!!!!!!!!!");
+  console.log(socket);
+});
+
 const handleListen = () => console.log(`Listen on http://localhost:3000`);
 
 // 포트 설정
