@@ -29,6 +29,8 @@ const server = http.createServer(app);
 //    - 구조 :: Hppt서버 위에  (server 변수) Socket용 서버(wss 변수)를 올린 것이다.
 const wss = new WebSocket.Server({ server });
 
+// 💬 소켓이 connection 될 때 실행 되는 이벤트 함수
+//    - docunmen~~.addEventListen~~ 랑 비슷함
 wss.on("connection", (socket) => {
   console.log("!!!!!!!!!!!!!!");
   console.log(socket);
