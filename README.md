@@ -65,29 +65,91 @@ Zoom Clone using NodeJs, Web RTC
 
 ### ws 단계별 간단한 적용 코드
 
-```javascript
-{
-  /** Server.js */
-  import http from "http";
-  import express from "express";
-  import WebSocket from "ws";
+- 간단한 연동
 
-  // express 사용
-  const app = express();
+  ```javascript
+  {
+    /** Server.js */
+    import http from "http";
+    import express from "express";
+    import WebSocket from "ws";
 
-  // http 서버 생성 - 같은 포트로 WebSocket을 사용하기 위함
-  const server = http.createServer(app);
+    // express 사용
+    const app = express();
 
-  // WebSocket 생성 매개변수로 http서버를 주입 - http 서버위에 WebSocket을 올림
-  const wss = new WebSocket.Server({ server });
+    // http 서버 생성 - 같은 포트로 WebSocket을 사용하기 위함
+    const server = http.createServer(app);
 
-  // Connection 성공 시 해당 매서드 사용
-  wss.on("connection", (socket) => {
-    console.log("!!!!!!!!!!!!!!");
-    console.log(socket);
-  });
+    // WebSocket 생성 매개변수로 http서버를 주입 - http 서버위에 WebSocket을 올림
+    const wss = new WebSocket.Server({ server });
 
-  // 포트 설정
-  server.listen(3000);
-}
-```
+    // Connection 성공 시 해당 매서드 사용
+    wss.on("connection", (socket) => {
+      console.log("!!!!!!!!!!!!!!");
+      console.log(socket);
+    });
+
+    // 포트 설정
+    server.listen(3000);
+  }
+  {
+    /** Client */
+    // 👉 Client에서 서버로 소켓 통신을 요청함.
+    const socket = new WebSocket(`ws://${window.location.host}`);
+  }
+  ```
+
+- Client <-> Server 데이터 주고 받기
+
+  ```javascript
+  {
+    /** Server.js */
+    import http from "http";
+    import express from "express";
+    import WebSocket from "ws";
+
+    const app = express();
+
+    const server = http.createServer(app);
+    const wss = new WebSocket.Server({ server });
+
+    // 💬 커넥션 이후 socket에 대한 이벤트 처리를 담당함
+    wss.on("connection", (socket) => {
+      console.log("Server :: Connection to Client Success!!✅");
+      // ⭐️ 메세지 보내기
+      socket.send("Hello!!!");
+      // ⭐️ 클라이언트에서 메세지 받기
+      socket.on("message", (message) => console.log(message.toString("utf8")));
+      // ⭐️ Client에서 Sokect 중단 시 실행
+      socket.on("close", () => {
+        console.log("클라이언트에서 종료 시 해당 함수 실행!!! ❌");
+      });
+    });
+  }
+
+  {
+    /** Client */
+    // 👉 Client에서 서버로 소켓 통신을 요청함.
+    const socket = new WebSocket(`ws://${window.location.host}`);
+
+    // 👉 Socket Open
+    socket.addEventListener("open", () => {
+      console.log("Client :: Connection to Server Success!!");
+    });
+
+    // 👉 Socket get Message
+    socket.addEventListener("message", (message) => {
+      console.log("Just got this :: ", message.data);
+    });
+
+    // 👉 Socket get Message 받기
+    socket.addEventListener("close", () => {
+      console.log("Disconnected Server");
+    });
+
+    // 👉 서버로 메세지 보내기
+    setTimeout(() => {
+      socket.send("Hello! 이건 클라이언트에서 보내는 메세지야 안녕");
+    }, 5_000);
+  }
+  ```
