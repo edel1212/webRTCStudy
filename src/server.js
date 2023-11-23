@@ -32,8 +32,16 @@ const wss = new WebSocket.Server({ server });
 // 💬 소켓이 connection 될 때 실행 되는 이벤트 함수
 //    - docunmen~~.addEventListen~~ 랑 비슷함
 wss.on("connection", (socket) => {
-  console.log("!!!!!!!!!!!!!!");
-  console.log(socket);
+  console.log("Server :: Connection to Client Success!!✅");
+
+  // ⭐️ 메세지 보내기
+  socket.send("Hello!!!");
+  // ⭐️ 클라이언트에서 메세지 받기
+  socket.on("message", (message) => console.log(message.toString("utf8")));
+  // ⭐️ Client에서 Sokect 중단 시 실행
+  socket.on("close", () => {
+    console.log("클라이언트에서 종료 시 해당 함수 실행!!! ❌");
+  });
 });
 
 const handleListen = () => console.log(`Listen on http://localhost:3000`);

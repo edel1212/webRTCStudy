@@ -62,3 +62,32 @@ Zoom Clone using NodeJs, Web RTC
     // 포트 설정
     server.listen(3000, handleListen);
     ```
+
+### ws 단계별 간단한 적용 코드
+
+```javascript
+{
+  /** Server.js */
+  import http from "http";
+  import express from "express";
+  import WebSocket from "ws";
+
+  // express 사용
+  const app = express();
+
+  // http 서버 생성 - 같은 포트로 WebSocket을 사용하기 위함
+  const server = http.createServer(app);
+
+  // WebSocket 생성 매개변수로 http서버를 주입 - http 서버위에 WebSocket을 올림
+  const wss = new WebSocket.Server({ server });
+
+  // Connection 성공 시 해당 매서드 사용
+  wss.on("connection", (socket) => {
+    console.log("!!!!!!!!!!!!!!");
+    console.log(socket);
+  });
+
+  // 포트 설정
+  server.listen(3000);
+}
+```
