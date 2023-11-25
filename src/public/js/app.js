@@ -17,6 +17,11 @@ messageForm.addEventListener("submit", (e) => {
   const input = messageForm.querySelector("input");
   // 서버에 input 데이터 전송
   socket.send(makeMessage("new_message", input.value));
+
+  const li = document.createElement("li");
+  li.innerText = `나 : ${input.value}`;
+  messageList.append(li);
+
   // 초기화
   input.value = "";
 });
@@ -42,11 +47,11 @@ socket.addEventListener("open", () => {
 // 👉 Socket get Message
 socket.addEventListener("message", (message) => {
   const li = document.createElement("li");
-  li.innerText = message.data;
+  li.innerText = `${message.data}`;
   messageList.append(li);
 });
 
-// 👉 Socket get Message 받기
+// 👉 소켓 닫혔을 경우
 socket.addEventListener("close", () => {
   console.log("Disconnected Server");
 });

@@ -1,64 +1,40 @@
-// ⭐ "http"는 Nodeks에 기본적으로 설치되어 있음
 import http from "http";
 import express from "express";
-//  💬 ws 사용을 위한 import
-import WebSocket from "ws";
 
 const app = express();
 
 app.set("view engine", "pug");
 
-console.log(__dirname); // 👉 /Users/yoo/Desktop/Project/zoom/src
-
-// viwer 폴더 위치 및 파일 지정
 app.set("views", __dirname + "/views");
-// static 파일 위치 지정
 app.use("/public", express.static(__dirname + "/public"));
-
-// "/" path로 들어올 경우 해당 위의 경로의 home.pug파일을 불러와 Html 랜더링
 app.get("/", (req, res) => res.render("home"));
-// 모든 path redirect 시키기
 app.get("/*", (req, res) => res.redirect("/"));
 
-// 💬 http서버를 생성 - websocket을 함께 사용하기위해 생성함
 const server = http.createServer(app);
-
-// 💬 굳이 파라미터로 server를 넘겨줄필요가 없지만 넘겨주는 이유는
-//    이런식으로 해야 http서버와 websocket서버를 동시에 사용이 가능함
-//    두개의 프로토콜 기능이 같은 포트에서 작동하기를 위해 이렇게 하는것임! 필수가 아니다 절대로!!
-//    - 구조 :: Hppt서버 위에  (server 변수) Socket용 서버(wss 변수)를 올린 것이다.
-const wss = new WebSocket.Server({ server });
-
-// 👉 누군가 연결하면 그 connection을 해당 배열에 넣어서 관리
-const sockets = [];
-
-// 💬 소켓이 connection 될 때 실행 되는 이벤트 함수
-//    - docunmen~~.addEventListen~~ 랑 비슷함
-wss.on("connection", (socket) => {
-  // 닉네임 기본 값 설정
-  socket["nickname"] = "지정하지 않은 닉네임 사용자";
-  sockets.push(socket);
-  // Client에서 전달 받은 메세지를 다른 사람에게 보내기
-  socket.on("message", (msg) => {
-    const aMessage = JSON.parse(msg);
-    sockets.forEach((aSocektItem) => {
-      switch (aMessage.type) {
-        case "new_message":
-          aSocektItem.send(
-            `${socket.nickname} : ${aMessage.payload.toString("utf8")}`
-          );
-          break;
-        case "nickname":
-          // ⭐️ socket 자체는 Object이기에 아래 처럼 사용이 가능하다
-          socket["nickname"] = aMessage.payload;
-          break;
-      } // switch
-    });
-  });
-  socket.on("close", () => console.log("⭐️ Client에서 Sokect 중단 시 실행❌"));
-});
-
-const handleListen = () => console.log(`Listen on http://localhost:3000`);
+/****************************************** */
+// const sockets = [];
+// wss.on("connection", (socket) => {
+//   socket["nickname"] = "지정하지 않은 닉네임 사용자";
+//   sockets.push(socket);
+//   socket.on("message", (msg) => {
+//     const aMessage = JSON.parse(msg);
+//     sockets.forEach((aSocektItem) => {
+//       switch (aMessage.type) {
+//         case "new_message":
+//           aSocektItem.send(
+//             `${socket.nickname} : ${aMessage.payload.toString("utf8")}`
+//           );
+//           break;
+//         case "nickname":
+//           // ⭐️ socket 자체는 Object이기에 아래 처럼 사용이 가능하다
+//           socket["nickname"] = aMessage.payload;
+//           break;
+//       } // switch
+//     });
+//   });
+//   socket.on("close", () => console.log("⭐️ Client에서 Sokect 중단 시 실행❌"));
+// });
+/****************************************** */
 
 // 포트 설정
-server.listen(3000, handleListen);
+server.listen(3000);

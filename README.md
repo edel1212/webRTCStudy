@@ -216,79 +216,82 @@ Zoom Clone using NodeJs, Web RTC
 
 #### - 닉네임 지정
 
-    ```javascript
-    {
-        /** Server */
-        import http from "http";
-        import express from "express";
-        import WebSocket from "ws";
+```javascript
+{
+  /** Server */
+  import http from "http";
+  import express from "express";
+  import WebSocket from "ws";
 
-        const app = express();
+  const app = express();
 
-        const server = http.createServer(app);
-        const wss = new WebSocket.Server({ server });
+  const server = http.createServer(app);
+  const wss = new WebSocket.Server({ server });
 
-        /**
-         * 👉 누군가 연결하면 그 connection을 해당 배열에 넣어서 관리
-         *  - 해당 배열로 관리하지 않으면 접근한 Socket자체에만 send하기 떄문에
-         *    다른 클라이언트에서 받지 못함 아래의 forEach를 써서 Loop돌려서 보냄
-         *    !! 단 좋은 방법은 아니나 임시로 사용중인 코드 (중복이 가능하다 무한 배열...)
-         */
-        const sockets = [];
+  /**
+   * 👉 누군가 연결하면 그 connection을 해당 배열에 넣어서 관리
+   *  - 해당 배열로 관리하지 않으면 접근한 Socket자체에만 send하기 떄문에
+   *    다른 클라이언트에서 받지 못함 아래의 forEach를 써서 Loop돌려서 보냄
+   *    !! 단 좋은 방법은 아니나 임시로 사용중인 코드 (중복이 가능하다 무한 배열...)
+   */
+  const sockets = [];
 
-        wss.on("connection", (socket) => {
-        // 💬 배열에 소켓에 접속한 대상을 push 해줌
-        sockets.push(socket);
+  wss.on("connection", (socket) => {
+    // 💬 배열에 소켓에 접속한 대상을 push 해줌
+    sockets.push(socket);
 
-        // 메세지 전달
-        socket.on("message", (message) => {
-            // 👉 Loop를 통해 접근한 모든 소켓 대상에게 메세지 전달 비효율적이긴하나 보내는 진다.
-            sockets.forEach((aSocekt) => {
-            aSocekt.send(message.toString("utf8"));
-            });
-        });
-        });
+    // 메세지 전달
+    socket.on("message", (message) => {
+      // 👉 Loop를 통해 접근한 모든 소켓 대상에게 메세지 전달 비효율적이긴하나 보내는 진다.
+      sockets.forEach((aSocekt) => {
+        aSocekt.send(message.toString("utf8"));
+      });
+    });
+  });
+}
 
-    }
+{
+  /** Client */
+  const messageList = document.querySelector("ul");
+  const nickForm = document.querySelector("#nick");
+  const messageForm = document.querySelector("#message");
 
-    {
-        /** Client */
-        const messageList = document.querySelector("ul");
-        const nickForm = document.querySelector("#nick");
-        const messageForm = document.querySelector("#message");
+  const socket = new WebSocket(`ws://${window.location.host}`);
 
-        const socket = new WebSocket(`ws://${window.location.host}`);
+  const makeMessage = (type, payload) => {
+    const msg = { type, payload };
+    // 👍 String으로 변환해서 보내는 이유는 받는 Socket서버가 무조건 Node기반이 아닐 수 있기 때문이다!!
+    //    - 서버쪽에서 해당 JSON을 재파싱 하는 형식으로 가는게 맞는거임!
+    return JSON.stringify(msg);
+  };
 
-        const makeMessage = (type, payload) => {
-            const msg = { type, payload };
-            // 👍 String으로 변환해서 보내는 이유는 받는 Socket서버가 무조건 Node기반이 아닐 수 있기 때문이다!!
-            //    - 서버쪽에서 해당 JSON을 재파싱 하는 형식으로 가는게 맞는거임!
-            return JSON.stringify(msg);
-        };
+  // 💬 닉네임 저장
+  nickForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const input = nickForm.querySelector("input");
+    socket.send(makeMessage("nickname", input.value));
+    input.value = "";
+  });
 
-
-        // 💬 닉네임 저장
-        nickForm.addEventListener("submit", (e) => {
-            e.preventDefault();
-            const input = nickForm.querySelector("input");
-            socket.send(makeMessage("nickname", input.value));
-            input.value = "";
-        });
-
-        /****
-         * ⭐️ 개인적인 생각이지만 처음부터 JSON구조를 만들때 부터
-         *    회원의 정보를 갖고 있다가 보내는 형식으로 구현하는게 더
-         *    효율적인 구조라고 생각함 .. 왜 이렇게 하는건지 이해가 안 간다.
-         * **/
-        // 💬 메세지를 서버로 전송
-        messageForm.addEventListener("submit", (e) => {
-            e.preventDefault();
-            const input = messageForm.querySelector("input");
-            socket.send(makeMessage("new_message", input.value));
-            input.value = "";
-        });
-    }
-
+  /****
+   * ⭐️ 개인적인 생각이지만 처음부터 JSON구조를 만들때 부터
+   *    회원의 정보를 갖고 있다가 보내는 형식으로 구현하는게 더
+   *    효율적인 구조라고 생각함 .. 왜 이렇게 하는건지 이해가 안 간다.
+   * **/
+  // 💬 메세지를 서버로 전송
+  messageForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const input = messageForm.querySelector("input");
+    socket.send(makeMessage("new_message", input.value));
+    input.value = "";
+  });
+}
 ```
 
-```
+### Socket.io
+
+- Socket.io는 프레임워크이다.
+- 실시간, 양방향 , event 기반 통신을 제공한다.
+- Socket.io는 "Websocket"의 부가 기능이 아니다. 가끔 websocket을 이용해서 실시간 양방향 기반 통신을 제공하는 프레임워크일 뿐이다.
+  - Webscoket이 작동하지 않는다면 Socket.IO는 알아서 다른 방법을 통해 통신을 계속해나간다는 큰 장점이 있다.
+- 실시간 통신을 위해서 꼭 Socket IO를 사용할 필요는 없지만 사용한다면 훨씬 더 쉽고 편리한 기능들을 제공해주는 프레임워크이기에 사용하는 것이다.
