@@ -302,3 +302,35 @@ Zoom Clone using NodeJs, Web RTC
 
 - 설치
   - `npm i socket.io`
+
+#### - 간단한 연동
+
+```javascript
+{
+  /** Server */
+  import http from "http";
+  import express from "express";
+  import SocketIO from "socket.io";
+
+  const app = express();
+
+  const httpServer = http.createServer(app);
+  // 👉 SocketIO 서버 생성 - 간단하게 매개변수 주입으로 끝
+  const wsServer = SocketIO(httpServer);
+  wsServer.on("connection", (socket) => {
+    console.log(socket);
+  });
+
+  httpServer.listen(3000);
+}
+
+{
+  /** Client */
+  //- ⭐ 진짜 중요 포인트이다 Client에서도 SocketIO를 불러와 설치해야함!!
+  //     - 서버에 npm으로 SocketIO를 설치하면 자동으로 해당 js가 생성 된다.
+  script((src = "/socket.io/socket.io.js"));
+
+  // 💬 간단하게 io()만으로 소켓 연결 완료 - socket.io.js에서 가져온 함수 사용
+  const soekct = io();
+}
+```
