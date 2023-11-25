@@ -29,19 +29,21 @@ const server = http.createServer(app);
 //    - 구조 :: Hppt서버 위에  (server 변수) Socket용 서버(wss 변수)를 올린 것이다.
 const wss = new WebSocket.Server({ server });
 
+// 👉 누군가 연결하면 그 connection을 해당 배열에 넣어서 관리
+const sockets = [];
+
 // 💬 소켓이 connection 될 때 실행 되는 이벤트 함수
 //    - docunmen~~.addEventListen~~ 랑 비슷함
 wss.on("connection", (socket) => {
-  console.log("Server :: Connection to Client Success!!✅");
+  sockets.push(socket);
 
-  // ⭐️ 메세지 보내기
-  socket.send("Hello!!!");
-  // ⭐️ 클라이언트에서 메세지 받기
-  socket.on("message", (message) => console.log(message.toString("utf8")));
-  // ⭐️ Client에서 Sokect 중단 시 실행
-  socket.on("close", () => {
-    console.log("클라이언트에서 종료 시 해당 함수 실행!!! ❌");
+  // Client에서 전달 받은 메세지를 다른 사람에게 보내기
+  socket.on("message", (message) => {
+    sockets.forEach((aSocekt) => {
+      aSocekt.send(message.toString("utf8"));
+    });
   });
+  socket.on("close", () => console.log("⭐️ Client에서 Sokect 중단 시 실행❌"));
 });
 
 const handleListen = () => console.log(`Listen on http://localhost:3000`);

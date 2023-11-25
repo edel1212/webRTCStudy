@@ -16,7 +16,17 @@ socket.addEventListener("close", () => {
   console.log("Disconnected Server");
 });
 
-// 👉 서버로 메세지 보내기
-setTimeout(() => {
-  socket.send("Hello! 이건 클라이언트에서 보내는 메세지야 안녕");
-}, 5_000);
+////////////////////////////
+
+const messageList = document.querySelector("ul");
+const messageForm = document.querySelector("form");
+
+// 💬 메세지를 서버로 전송
+messageForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const input = messageForm.querySelector("input");
+  // 전송
+  socket.send(input.value);
+  // 초기화
+  input.value = "";
+});
