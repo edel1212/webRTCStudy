@@ -65,144 +65,225 @@ Zoom Clone using NodeJs, Web RTC
 
 ### ws 단계별 간단한 적용 코드
 
-- 간단한 연동
+#### - 간단한 연동
 
-  ```javascript
-  {
-    /** Server.js */
-    import http from "http";
-    import express from "express";
-    import WebSocket from "ws";
+```javascript
+{
+  /** Server.js */
+  import http from "http";
+  import express from "express";
+  import WebSocket from "ws";
 
-    // express 사용
-    const app = express();
+  // express 사용
+  const app = express();
 
-    // http 서버 생성 - 같은 포트로 WebSocket을 사용하기 위함
-    const server = http.createServer(app);
+  // http 서버 생성 - 같은 포트로 WebSocket을 사용하기 위함
+  const server = http.createServer(app);
 
-    // WebSocket 생성 매개변수로 http서버를 주입 - http 서버위에 WebSocket을 올림
-    const wss = new WebSocket.Server({ server });
+  // WebSocket 생성 매개변수로 http서버를 주입 - http 서버위에 WebSocket을 올림
+  const wss = new WebSocket.Server({ server });
 
-    // Connection 성공 시 해당 매서드 사용
-    wss.on("connection", (socket) => {
-      console.log("!!!!!!!!!!!!!!");
-      console.log(socket);
+  // Connection 성공 시 해당 매서드 사용
+  wss.on("connection", (socket) => {
+    console.log("!!!!!!!!!!!!!!");
+    console.log(socket);
+  });
+
+  // 포트 설정
+  server.listen(3000);
+}
+{
+  /** Client */
+  // 👉 Client에서 서버로 소켓 통신을 요청함.
+  const socket = new WebSocket(`ws://${window.location.host}`);
+}
+```
+
+#### - Client <-> Server 데이터 주고 받기
+
+```javascript
+{
+  /** Server.js */
+  import http from "http";
+  import express from "express";
+  import WebSocket from "ws";
+
+  const app = express();
+
+  const server = http.createServer(app);
+  const wss = new WebSocket.Server({ server });
+
+  // 💬 커넥션 이후 socket에 대한 이벤트 처리를 담당함
+  wss.on("connection", (socket) => {
+    console.log("Server :: Connection to Client Success!!✅");
+    // ⭐️ 메세지 보내기
+    socket.send("Hello!!!");
+    // ⭐️ 클라이언트에서 메세지 받기
+    socket.on("message", (message) => console.log(message.toString("utf8")));
+    // ⭐️ Client에서 Sokect 중단 시 실행
+    socket.on("close", () => {
+      console.log("클라이언트에서 종료 시 해당 함수 실행!!! ❌");
     });
+  });
+}
 
-    // 포트 설정
-    server.listen(3000);
-  }
-  {
-    /** Client */
-    // 👉 Client에서 서버로 소켓 통신을 요청함.
-    const socket = new WebSocket(`ws://${window.location.host}`);
-  }
-  ```
+{
+  /** Client */
+  // 👉 Client에서 서버로 소켓 통신을 요청함.
+  const socket = new WebSocket(`ws://${window.location.host}`);
 
-- Client <-> Server 데이터 주고 받기
+  // 👉 Socket Open
+  socket.addEventListener("open", () => {
+    console.log("Client :: Connection to Server Success!!");
+  });
 
-  ```javascript
-  {
-    /** Server.js */
-    import http from "http";
-    import express from "express";
-    import WebSocket from "ws";
+  // 👉 Socket get Message
+  socket.addEventListener("message", (message) => {
+    console.log("Just got this :: ", message.data);
+  });
 
-    const app = express();
+  // 👉 Socket get Message 받기
+  socket.addEventListener("close", () => {
+    console.log("Disconnected Server");
+  });
 
-    const server = http.createServer(app);
-    const wss = new WebSocket.Server({ server });
+  // 👉 서버로 메세지 보내기
+  setTimeout(() => {
+    socket.send("Hello! 이건 클라이언트에서 보내는 메세지야 안녕");
+  }, 5_000);
+}
+```
 
-    // 💬 커넥션 이후 socket에 대한 이벤트 처리를 담당함
-    wss.on("connection", (socket) => {
-      console.log("Server :: Connection to Client Success!!✅");
-      // ⭐️ 메세지 보내기
-      socket.send("Hello!!!");
-      // ⭐️ 클라이언트에서 메세지 받기
-      socket.on("message", (message) => console.log(message.toString("utf8")));
-      // ⭐️ Client에서 Sokect 중단 시 실행
-      socket.on("close", () => {
-        console.log("클라이언트에서 종료 시 해당 함수 실행!!! ❌");
+#### - 서로 다른 Client 끼리 메세지 주고 받기
+
+```javascript
+{
+  /** Server */
+  import http from "http";
+  import express from "express";
+  import WebSocket from "ws";
+
+  const app = express();
+
+  const server = http.createServer(app);
+  const wss = new WebSocket.Server({ server });
+
+  const sockets = [];
+
+  wss.on("connection", (socket) => {
+    // ⭐️ socket자체가 Object이기에 가능하다.
+    //    - 닉네임 기본 값 설정
+    socket["nickname"] = "지정하지 않은 닉네임 사용자";
+
+    sockets.push(socket);
+
+    // 메세지 전달
+    socket.on("message", (msg) => {
+      // 💬 Client측에서 넘긴 문자열을  JSON으로 반환하여 사용
+      const aMessage = JSON.parse(msg);
+      sockets.forEach((aSocektItem) => {
+        switch (aMessage.type) {
+          case "new_message": // 메세지 일 경우
+            aSocektItem.send(
+              `${socket.nickname} : ${aMessage.payload.toString("utf8")}`
+            );
+            break;
+          case "nickname": // 닉네임일 경우
+            socket["nickname"] = aMessage.payload;
+            break;
+        } // switch
       });
     });
-  }
+  });
+}
 
-  {
-    /** Client */
-    // 👉 Client에서 서버로 소켓 통신을 요청함.
-    const socket = new WebSocket(`ws://${window.location.host}`);
+{
+  /** Client */
+  const messageList = document.querySelector("ul");
+  const messageForm = document.querySelector("form");
 
-    // 👉 Socket Open
-    socket.addEventListener("open", () => {
-      console.log("Client :: Connection to Server Success!!");
-    });
+  // 💬 메세지를 서버로 전송
+  messageForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const input = messageForm.querySelector("input");
+    // 서버에 input 데이터 전송
+    socket.send(input.value);
+    // 초기화
+    input.value = "";
+  });
+}
+```
 
-    // 👉 Socket get Message
-    socket.addEventListener("message", (message) => {
-      console.log("Just got this :: ", message.data);
-    });
+#### - 닉네임 지정
 
-    // 👉 Socket get Message 받기
-    socket.addEventListener("close", () => {
-      console.log("Disconnected Server");
-    });
+    ```javascript
+    {
+        /** Server */
+        import http from "http";
+        import express from "express";
+        import WebSocket from "ws";
 
-    // 👉 서버로 메세지 보내기
-    setTimeout(() => {
-      socket.send("Hello! 이건 클라이언트에서 보내는 메세지야 안녕");
-    }, 5_000);
-  }
-  ```
+        const app = express();
 
-- 서로 다른 Client 끼리 메세지 주고 받기
+        const server = http.createServer(app);
+        const wss = new WebSocket.Server({ server });
 
-  ```javascript
-  {
-    /** Server */
-    import http from "http";
-    import express from "express";
-    import WebSocket from "ws";
+        /**
+         * 👉 누군가 연결하면 그 connection을 해당 배열에 넣어서 관리
+         *  - 해당 배열로 관리하지 않으면 접근한 Socket자체에만 send하기 떄문에
+         *    다른 클라이언트에서 받지 못함 아래의 forEach를 써서 Loop돌려서 보냄
+         *    !! 단 좋은 방법은 아니나 임시로 사용중인 코드 (중복이 가능하다 무한 배열...)
+         */
+        const sockets = [];
 
-    const app = express();
+        wss.on("connection", (socket) => {
+        // 💬 배열에 소켓에 접속한 대상을 push 해줌
+        sockets.push(socket);
 
-    const server = http.createServer(app);
-    const wss = new WebSocket.Server({ server });
-
-    /**
-     * 👉 누군가 연결하면 그 connection을 해당 배열에 넣어서 관리
-     *  - 해당 배열로 관리하지 않으면 접근한 Socket자체에만 send하기 떄문에
-     *    다른 클라이언트에서 받지 못함 아래의 forEach를 써서 Loop돌려서 보냄
-     *    !! 단 좋은 방법은 아니나 임시로 사용중인 코드 (중복이 가능하다 무한 배열...)
-     */
-    const sockets = [];
-
-    wss.on("connection", (socket) => {
-      // 💬 배열에 소켓에 접속한 대상을 push 해줌
-      sockets.push(socket);
-
-      // 메세지 전달
-      socket.on("message", (message) => {
-        // 👉 Loop를 통해 접근한 모든 소켓 대상에게 메세지 전달 비효율적이긴하나 보내는 진다.
-        sockets.forEach((aSocekt) => {
-          aSocekt.send(message.toString("utf8"));
+        // 메세지 전달
+        socket.on("message", (message) => {
+            // 👉 Loop를 통해 접근한 모든 소켓 대상에게 메세지 전달 비효율적이긴하나 보내는 진다.
+            sockets.forEach((aSocekt) => {
+            aSocekt.send(message.toString("utf8"));
+            });
         });
-      });
-    });
-  }
+        });
 
-  {
-    /** Client */
-    const messageList = document.querySelector("ul");
-    const messageForm = document.querySelector("form");
+    }
 
-    // 💬 메세지를 서버로 전송
-    messageForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const input = messageForm.querySelector("input");
-      // 서버에 input 데이터 전송
-      socket.send(input.value);
-      // 초기화
-      input.value = "";
-    });
-  }
-  ```
+    {
+        /** Client */
+        const messageList = document.querySelector("ul");
+        const nickForm = document.querySelector("#nick");
+        const messageForm = document.querySelector("#message");
+
+        const socket = new WebSocket(`ws://${window.location.host}`);
+
+        const makeMessage = (type, payload) => {
+            const msg = { type, payload };
+            // 👍 String으로 변환해서 보내는 이유는 받는 Socket서버가 무조건 Node기반이 아닐 수 있기 때문이다!!
+            //    - 서버쪽에서 해당 JSON을 재파싱 하는 형식으로 가는게 맞는거임!
+            return JSON.stringify(msg);
+        };
+
+
+        // 💬 닉네임 저장
+        nickForm.addEventListener("submit", (e) => {
+            e.preventDefault();
+            const input = nickForm.querySelector("input");
+            socket.send(makeMessage("nickname", input.value));
+            input.value = "";
+        });
+
+        // 💬 메세지를 서버로 전송
+        messageForm.addEventListener("submit", (e) => {
+            e.preventDefault();
+            const input = messageForm.querySelector("input");
+            socket.send(makeMessage("new_message", input.value));
+            input.value = "";
+        });
+    }
+
+```
+
+```
