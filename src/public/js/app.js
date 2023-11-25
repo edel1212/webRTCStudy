@@ -25,7 +25,7 @@ const messageForm = document.querySelector("form");
 messageForm.addEventListener("submit", (e) => {
   e.preventDefault();
   const input = messageForm.querySelector("input");
-  // 전송
+  // 서버에 input 데이터 전송
   socket.send(input.value);
   // 초기화
   input.value = "";

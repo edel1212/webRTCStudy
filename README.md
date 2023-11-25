@@ -153,3 +153,56 @@ Zoom Clone using NodeJs, Web RTC
     }, 5_000);
   }
   ```
+
+- 서로 다른 Client 끼리 메세지 주고 받기
+
+  ```javascript
+  {
+    /** Server */
+    import http from "http";
+    import express from "express";
+    import WebSocket from "ws";
+
+    const app = express();
+
+    const server = http.createServer(app);
+    const wss = new WebSocket.Server({ server });
+
+    /**
+     * 👉 누군가 연결하면 그 connection을 해당 배열에 넣어서 관리
+     *  - 해당 배열로 관리하지 않으면 접근한 Socket자체에만 send하기 떄문에
+     *    다른 클라이언트에서 받지 못함 아래의 forEach를 써서 Loop돌려서 보냄
+     *    !! 단 좋은 방법은 아니나 임시로 사용중인 코드 (중복이 가능하다 무한 배열...)
+     */
+    const sockets = [];
+
+    wss.on("connection", (socket) => {
+      // 💬 배열에 소켓에 접속한 대상을 push 해줌
+      sockets.push(socket);
+
+      // 메세지 전달
+      socket.on("message", (message) => {
+        // 👉 Loop를 통해 접근한 모든 소켓 대상에게 메세지 전달 비효율적이긴하나 보내는 진다.
+        sockets.forEach((aSocekt) => {
+          aSocekt.send(message.toString("utf8"));
+        });
+      });
+    });
+  }
+
+  {
+    /** Client */
+    const messageList = document.querySelector("ul");
+    const messageForm = document.querySelector("form");
+
+    // 💬 메세지를 서버로 전송
+    messageForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const input = messageForm.querySelector("input");
+      // 서버에 input 데이터 전송
+      socket.send(input.value);
+      // 초기화
+      input.value = "";
+    });
+  }
+  ```
