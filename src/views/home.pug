@@ -9,13 +9,7 @@ html(lang="en")
         header
             h1 Noom 
         main
-            form#nick
-                ul
-                input(type="text", placeholder="choose a nickName", required)
-                button Save
-            form#message
-                ul
-                input(type="text", placeholder="write msg", required)
-                button Send
-        //- 👉 사용할 javascript를 읽어옴 :: 필수적으로 express의 static 폴더 지정을 해줘야함(server.js)
+
+        //- ⭐ 진짜 중요 포인트이다 Client에서도 SocketIO를 불러와 설치해야함!!
+        script(src="/socket.io/socket.io.js")    
         script(src="/public/js/app.js")

@@ -295,3 +295,10 @@ Zoom Clone using NodeJs, Web RTC
 - Socket.io는 "Websocket"의 부가 기능이 아니다. 가끔 websocket을 이용해서 실시간 양방향 기반 통신을 제공하는 프레임워크일 뿐이다.
   - Webscoket이 작동하지 않는다면 Socket.IO는 알아서 다른 방법을 통해 통신을 계속해나간다는 큰 장점이 있다.
 - 실시간 통신을 위해서 꼭 Socket IO를 사용할 필요는 없지만 사용한다면 훨씬 더 쉽고 편리한 기능들을 제공해주는 프레임워크이기에 사용하는 것이다.
+- `http://localhost:???/socket.io/socket.io.js`와 같은 페이지 또한 제공해준다.
+
+  - 해당 페이지의 스크립트를 사용해서 Client에서 Server로 SocketIO 요청을 할 수 있게 한다. (설치 개념으로 봐도 좋다.)
+  - 이유는 SocketIO는 WebSocket이 아니기 때문에 따로 Client에서도 설치가 필요하다.
+
+- 설치
+  - `npm i socket.io`
