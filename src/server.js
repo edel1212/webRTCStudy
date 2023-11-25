@@ -35,12 +35,24 @@ const sockets = [];
 // 💬 소켓이 connection 될 때 실행 되는 이벤트 함수
 //    - docunmen~~.addEventListen~~ 랑 비슷함
 wss.on("connection", (socket) => {
+  // 닉네임 기본 값 설정
+  socket["nickname"] = "지정하지 않은 닉네임 사용자";
   sockets.push(socket);
-
   // Client에서 전달 받은 메세지를 다른 사람에게 보내기
-  socket.on("message", (message) => {
-    sockets.forEach((aSocekt) => {
-      aSocekt.send(message.toString("utf8"));
+  socket.on("message", (msg) => {
+    const aMessage = JSON.parse(msg);
+    sockets.forEach((aSocektItem) => {
+      switch (aMessage.type) {
+        case "new_message":
+          aSocektItem.send(
+            `${socket.nickname} : ${aMessage.payload.toString("utf8")}`
+          );
+          break;
+        case "nickname":
+          // ⭐️ socket 자체는 Object이기에 아래 처럼 사용이 가능하다
+          socket["nickname"] = aMessage.payload;
+          break;
+      } // switch
     });
   });
   socket.on("close", () => console.log("⭐️ Client에서 Sokect 중단 시 실행❌"));
