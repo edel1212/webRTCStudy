@@ -399,6 +399,9 @@ Zoom Clone using NodeJs, Web RTC
 
 ### emit(...) argument 사용
 
+- 다양한 타입의 데이터를 보낼 수있다.
+- 함수를 보낼 경우에는 서버에서 처리후 마직에 해당 함수를 사용해 서버에 반환 해준다.
+
 ```javascript
 {
   /** Client */
@@ -409,10 +412,10 @@ Zoom Clone using NodeJs, Web RTC
       "enter_room",
       { payload: input.value },
       "!",
-      "@",
-      "#",
-      "$",
-      "%"
+      1,
+      true,
+      false,
+      [1, 2, 3]
     );
     input.value = "";
   });
@@ -423,7 +426,7 @@ Zoom Clone using NodeJs, Web RTC
   wsServer.on("connection", (socket) => {
     // 첫번째 arg는 Client에서 지정한 Key 값
     socket.on("enter_room", (a, b, c, d, e, f) => {
-      // { payload: '123' } ! @ # $ %
+      // { payload: '123' } "!", 1, true, false, [1, 2, 3]
       console.log(a, b, c, d, e, f);
     });
   });
