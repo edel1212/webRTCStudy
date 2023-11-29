@@ -17,12 +17,9 @@ const wsServer = SocketIO(httpServer);
 
 wsServer.on("connection", (socket) => {
   // 첫번째 arg는 Client에서 지정한 Key 값
-  socket.on("enter_room", (msg, done) => {
-    console.log(msg);
-    // 👉 해당 함수는 Front에서 실행된다!!!
-    setTimeout(() => {
-      done();
-    }, 1000);
+  socket.on("enter_room", (a, b, c, d, e, f) => {
+    // { payload: '123' } ! @ # $ %
+    console.log(a, b, c, d, e, f);
   });
 });
 

@@ -340,7 +340,7 @@ Zoom Clone using NodeJs, Web RTC
 - SoketIO는 메세지를 전달하는 개념이 아닌 이벤트를 전달하는 개념이다.
 - 문자열만 보낼 수 있는게 아닌 여러가지 데이터 타입을 보낼 수 있다.
 - `socket.emit("서버에서 읽을 Key값",{메세지}, 서버에서 응답 후 반환 실행 함수  )`
-  - 3개의 argument 전달이 가능하다. [ 2개만 전달도 가능!! ]
+  - argument의 개수는 자유이다!!
 
 ```javascript
 {
@@ -363,7 +363,7 @@ Zoom Clone using NodeJs, Web RTC
      *      - SocketIO 프레임워크가 알아서 다 해결해준다.
      */
     soekct.emit("enter_room", { payload: input.value }, () => {
-      console.log("3번째 arg!! 서버에서 완료 후 해당 함수 실행 한다.");
+      console.log("서버에서 완료 후 해당 함수 실행 한다.");
     });
     // 초기화
     input.value = "";
@@ -388,8 +388,41 @@ Zoom Clone using NodeJs, Web RTC
 
       // 👉 해당 함수는 Front에서 실행된다!!!
       setTimeout(() => {
-        done(); // 💬 "3번째 arg!! 서버에서 완료 후 해당 함수 실행 한다."
+        done(); // 💬 "서버에서 완료 후 해당 함수 실행 한다."
       }, 1000);
+    });
+  });
+}
+```
+
+### emit(...) argument 사용
+
+```javascript
+{
+  /** Client */
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const input = form.querySelector("input");
+    soekct.emit(
+      "enter_room",
+      { payload: input.value },
+      "!",
+      "@",
+      "#",
+      "$",
+      "%"
+    );
+    input.value = "";
+  });
+}
+
+{
+  /** Server */
+  wsServer.on("connection", (socket) => {
+    // 첫번째 arg는 Client에서 지정한 Key 값
+    socket.on("enter_room", (a, b, c, d, e, f) => {
+      // { payload: '123' } ! @ # $ %
+      console.log(a, b, c, d, e, f);
     });
   });
 }
