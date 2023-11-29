@@ -17,9 +17,10 @@ const wsServer = SocketIO(httpServer);
 
 wsServer.on("connection", (socket) => {
   // 첫번째 arg는 Client에서 지정한 Key 값
-  socket.on("enter_room", (a, b, c, d, e, f) => {
+  socket.on("enter_room", (a, done) => {
     // { payload: '123' } ! @ # $ %
-    console.log(a, b, c, d, e, f);
+    console.log(a);
+    done("서버에서 작성한 메세지입니다!!");
   });
 });
 
