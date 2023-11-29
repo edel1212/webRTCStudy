@@ -334,3 +334,63 @@ Zoom Clone using NodeJs, Web RTC
   const soekct = io();
 }
 ```
+
+#### - 서버에 이벤트 함수 전달하기
+
+- SoketIO는 메세지를 전달하는 개념이 아닌 이벤트를 전달하는 개념이다.
+- 문자열만 보낼 수 있는게 아닌 여러가지 데이터 타입을 보낼 수 있다.
+- `socket.emit("서버에서 읽을 Key값",{메세지}, 서버에서 응답 후 반환 실행 함수  )`
+  - 3개의 argument 전달이 가능하다. [ 2개만 전달도 가능!! ]
+
+```javascript
+{
+  /** Client.js */
+  const soekct = io();
+
+  const welcome = document.querySelector("#welcome");
+  const form = welcome.querySelector("form");
+
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const input = form.querySelector("input");
+    /**
+     * ⭐️ SocketIo는 소켓서버에 메세지를 보낼때 send()가 아닌 "emit()"을 사용
+     *    - 단 여기서 중요 포인트는 사실 SocketIO는 메세지가 아닌 모든것을 보낼 수 있다는 것이다.
+     *       => 항상 메세지를 보낼 필요가 없다는 것이다.
+     *    - 따라서  soekct.emit("내마음대로 지정 가능", { 오브젝트도 가능});와 같이 사용이 가능하다
+     *
+     * 💯 : 일반 WebSocket을 사용했을 때는 문자열로 보냈지만 이제는 그럴 필요가 없다!!
+     *      - SocketIO 프레임워크가 알아서 다 해결해준다.
+     */
+    soekct.emit("enter_room", { payload: input.value }, () => {
+      console.log("3번째 arg!! 서버에서 완료 후 해당 함수 실행 한다.");
+    });
+    // 초기화
+    input.value = "";
+  });
+}
+
+{
+  /** Server.js */
+  import http from "http";
+  import express from "express";
+  import SocketIO from "socket.io";
+
+  const app = express();
+
+  const httpServer = http.createServer(app);
+  const wsServer = SocketIO(httpServer);
+
+  wsServer.on("connection", (socket) => {
+    // 👉 첫번째 arg는 Client에서 지정한 Key 값
+    socket.on("enter_room", (msg, done) => {
+      console.log(msg); // 💬 { payload: input.value }
+
+      // 👉 해당 함수는 Front에서 실행된다!!!
+      setTimeout(() => {
+        done(); // 💬 "3번째 arg!! 서버에서 완료 후 해당 함수 실행 한다."
+      }, 1000);
+    });
+  });
+}
+```
