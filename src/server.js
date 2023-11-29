@@ -16,7 +16,14 @@ const httpServer = http.createServer(app);
 const wsServer = SocketIO(httpServer);
 
 wsServer.on("connection", (socket) => {
-  console.log(socket);
+  // 첫번째 arg는 Client에서 지정한 Key 값
+  socket.on("enter_room", (msg, done) => {
+    console.log(msg);
+    // 👉 해당 함수는 Front에서 실행된다!!!
+    setTimeout(() => {
+      done();
+    }, 1000);
+  });
 });
 
 /****************************************** */
