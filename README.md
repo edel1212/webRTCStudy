@@ -300,6 +300,8 @@ Zoom Clone using NodeJs, Web RTC
   - 해당 페이지의 스크립트를 사용해서 Client에서 Server로 SocketIO 요청을 할 수 있게 한다. (설치 개념으로 봐도 좋다.)
   - 이유는 SocketIO는 WebSocket이 아니기 때문에 따로 Client에서도 설치가 필요하다.
 
+- 연결 중이던 SocketIO가 끊기면 계속해서 자동으로 재연결 요청을 보낸다.
+
 - 설치
   - `npm i socket.io`
 
