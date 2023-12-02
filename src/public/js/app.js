@@ -5,7 +5,10 @@ const welcome = document.querySelector("#welcome");
 const form = welcome.querySelector("form");
 
 const room = document.querySelector("#room");
+const roomNameTitle = document.querySelector("#rooName");
 room.hidden = true;
+
+let roomName;
 
 form.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -20,8 +23,12 @@ form.addEventListener("submit", (event) => {
    * 💯 : 일반 WebSocket을 사용했을 때는 문자열로 보냈지만 이제는 그럴 필요가 없다!!
    *      - SocketIO 프레임워크가 알아서 다 해결해준다.
    */
-  soekct.emit("enter_room", { payload: input.value }, (msg) => {
-    console.log(`서버에서 arg추가 후 전달 :: ${msg}`);
+  soekct.emit("enter_room", input.value, () => {
+    welcome.hidden = true;
+    room.hidden = false;
+    roomNameTitle.innerText = `Room :: ${roomName}`;
   });
+  roomName = input.value;
+
   input.value = "";
 });
