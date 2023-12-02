@@ -13,7 +13,11 @@ html(lang="en")
                 form
                     input(placeholder="room name", required, type="text")
                     button Enter Room
-
+            div#room
+                ul
+                    form(action="") 
+                        input(placeholder="Message", required, type="text")
+                        button Send
         //- ⭐ 진짜 중요 포인트이다 Client에서도 SocketIO를 불러와 설치해야함!!
         script(src="/socket.io/socket.io.js")    
         script(src="/public/js/app.js")

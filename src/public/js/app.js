@@ -4,6 +4,9 @@ const soekct = io();
 const welcome = document.querySelector("#welcome");
 const form = welcome.querySelector("form");
 
+const room = document.querySelector("#room");
+room.hidden = true;
+
 form.addEventListener("submit", (event) => {
   event.preventDefault();
   const input = form.querySelector("input");
