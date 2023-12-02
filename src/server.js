@@ -16,10 +16,17 @@ const httpServer = http.createServer(app);
 const wsServer = SocketIO(httpServer);
 
 wsServer.on("connection", (socket) => {
-  // 첫번째 arg는 Client에서 지정한 Key 값
-  socket.on("enter_room", (a, done) => {
-    // { payload: '123' } ! @ # $ %
-    console.log(a);
+  // ⭐️ 커넥션된 Socket의 모든 이벤트를 감지 할 수 있는 함수
+  socket.onAny((event) => {
+    console.log(`Socket Evnet : ${event}`);
+  });
+  ////////////////////////////////
+
+  socket.on("enter_room", (roomName, done) => {
+    console.log(socket.rooms); // 👉 Socket의 Room목록을 볼 수 있음
+    // chat Room을 생성함
+    socket.join(roomName);
+    console.log(socket.rooms); // 👉 Socket의 Room목록을 볼 수 있음
     done("서버에서 작성한 메세지입니다!!");
   });
 });
