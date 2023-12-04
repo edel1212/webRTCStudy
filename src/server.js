@@ -30,7 +30,7 @@ wsServer.on("connection", (socket) => {
     console.log(socket.rooms); // 👉 Socket의 Room목록을 볼 수 있음
     done();
 
-    socket.to(roomName).emit("Welcome!! - 해당 방에 들어온 모두에게 전달!");
+    socket.to(roomName).emit("welcome");
   });
 });
 

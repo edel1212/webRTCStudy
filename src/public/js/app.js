@@ -1,5 +1,5 @@
 // 💬 간단하게 io()만으로 소켓 연결 완료..
-const soekct = io();
+const socket = io();
 
 const welcome = document.querySelector("#welcome");
 const form = welcome.querySelector("form");
@@ -23,7 +23,7 @@ form.addEventListener("submit", (event) => {
    * 💯 : 일반 WebSocket을 사용했을 때는 문자열로 보냈지만 이제는 그럴 필요가 없다!!
    *      - SocketIO 프레임워크가 알아서 다 해결해준다.
    */
-  soekct.emit("enter_room", input.value, () => {
+  socket.emit("enter_room", input.value, () => {
     welcome.hidden = true;
     room.hidden = false;
     roomNameTitle.innerText = `Room :: ${roomName}`;
@@ -33,7 +33,7 @@ form.addEventListener("submit", (event) => {
   input.value = "";
 });
 
-Socket.on("welcome", () => {
+socket.on("welcome", () => {
   addMessage("Someone joined!!!");
 });
 
