@@ -462,3 +462,64 @@ Zoom Clone using NodeJs, Web RTC
   });
 }
 ```
+
+### 방 생성 및 지정 방에 이벤트 전달 및 적용
+
+- 흐름
+  - 방을 만든다.
+  - 해당 방에 접근 시 자신을 제외한 모든 이에게 이벤트 전달
+  - 여기서 이벤트는 메세지가 될 수도 있고 여려가지가 가능하다.
+- 중요 포인트
+  - 1 . `socket.join(여기에 방이름!!);`을 통해 방을 생성
+  -
+
+```javascript
+{
+  /** Server.js */
+  import http from "http";
+  import express from "express";
+  import SocketIO from "socket.io";
+
+  const app = express();
+  const httpServer = http.createServer(app);
+  const wsServer = SocketIO(httpServer);
+
+  wsServer.on("connection", (socket) => {
+    socket.on("enter_room", (roomName, done) => {
+      // 👉 Socket에서 만들어주는 UUID Log 확인
+      console.log(socket.id);
+      // 👉 Socket의 Room목록을 볼 수 있음
+      console.log(socket.rooms);
+
+      /***
+       * 💯 chat Room을 생성함
+       *    - 해당 아이디가 있을 경우에는 그냥 입장함 매우 간단!!
+       */
+      socket.join(roomName);
+      done();
+
+      // 👍 해당 방에 입장한 모든이에게 welcome 함수 전달
+      // !!! emit("welcome",아무거나 넣으면 Client에서 매개변수로 들어감!!)
+      socket.to(roomName).emit("welcome");
+    });
+  });
+}
+
+{
+  /** Client */
+
+  // 💬 메세지를 li로 만들어 추가해 줄 함수
+  const addMessage = (message) => {
+    const ul = room.querySelector("ul");
+    const li = document.createElement("li");
+    li.innerText = message;
+    ul.appendChild(li);
+  };
+
+  // 👉 서버에서 "welcome"이라는 함수를 전달 받을 경우!! 실행
+  // !!! 함수에 매개변수를 넣으면 받아서 사용 가능 - 서버에서 전달해주는 값
+  socket.on("welcome", () => {
+    addMessage("Someone joined!!!");
+  });
+}
+```
