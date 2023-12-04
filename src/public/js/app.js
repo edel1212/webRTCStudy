@@ -32,3 +32,14 @@ form.addEventListener("submit", (event) => {
 
   input.value = "";
 });
+
+Socket.on("welcome", () => {
+  addMessage("Someone joined!!!");
+});
+
+const addMessage = (message) => {
+  const ul = room.querySelector("ul");
+  const li = document.createElement("li");
+  li.innerText = message;
+  ul.appendChild(li);
+};
