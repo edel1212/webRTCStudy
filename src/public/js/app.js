@@ -27,6 +27,14 @@ form.addEventListener("submit", (event) => {
     welcome.hidden = true;
     room.hidden = false;
     roomNameTitle.innerText = `Room :: ${roomName}`;
+    const form = room.querySelector("form");
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const input = room.querySelector("input");
+      socket.emit("new_message", input.value, roomName, () => {
+        addMessage(`You : ${input.value}`);
+      });
+    });
   });
   roomName = input.value;
 
@@ -49,4 +57,8 @@ socket.on("welcome", () => {
 
 socket.on("bye", () => {
   addMessage("나 나간다!!!");
+});
+
+socket.on("toMessage", (msg) => {
+  addMessage(msg);
 });

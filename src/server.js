@@ -41,6 +41,14 @@ wsServer.on("connection", (socket) => {
       socket.to(room).emit("bye");
     });
   });
+
+  //////////////////////////////////
+
+  // 😅 중요 포인트 여기서 room은 client에서 넘긴 값임!!
+  socket.on("new_message", (msg, room, done) => {
+    socket.to(room).emit("toMessage", msg);
+    done();
+  });
 });
 
 /****************************************** */
