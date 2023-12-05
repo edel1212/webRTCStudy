@@ -33,13 +33,20 @@ form.addEventListener("submit", (event) => {
   input.value = "";
 });
 
-socket.on("welcome", () => {
-  addMessage("Someone joined!!!");
-});
-
+/**
+ * 메세지 li를 만들어 ul에 추가하는 함수
+ */
 const addMessage = (message) => {
   const ul = room.querySelector("ul");
   const li = document.createElement("li");
   li.innerText = message;
   ul.appendChild(li);
 };
+
+socket.on("welcome", () => {
+  addMessage("Someone joined!!!");
+});
+
+socket.on("bye", () => {
+  addMessage("나 나간다!!!");
+});
