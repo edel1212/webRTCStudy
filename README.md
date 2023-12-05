@@ -523,3 +523,96 @@ Zoom Clone using NodeJs, Web RTC
   });
 }
 ```
+
+### 메세지 보내기
+
+```javascript
+{
+  /** Client.js */
+  const socket = io();
+
+  const form = welcome.querySelector("form");
+
+  // 1 . 방 생성
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const input = form.querySelector("input");
+
+    // 2 . "enter_room"이름으로 서버에 함수 전달
+    // - 매개 변수 ...arg[함수명, 방이름, 완료 후 적용 함수]
+    socket.emit("enter_room", input.value, () => {
+      welcome.hidden = true;
+      room.hidden = false;
+      roomNameTitle.innerText = `Room :: ${roomName}`;
+      const form = room.querySelector("form");
+
+      // 3 . 메세지 전달 클릭 시
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const input = room.querySelector("input");
+
+        // 4 . "new_message"으로 서버에 함수 전달
+        // - 매개 변수 ...arg[함수명, 채팅내용, 완료 후 적용 함수]
+        socket.emit("new_message", input.value, roomName, () => {
+          // ul에 내가 적은 함수 !
+          addMessage(`You : ${input.value}`);
+        });
+      });
+    });
+    roomName = input.value;
+
+    input.value = "";
+  });
+
+  // 👉 서버에서 "toMessage"로 함수가 전달 왔을 시 사용할 이밴트
+  socket.on("toMessage", (msg) => {
+    addMessage(msg);
+  });
+
+  // 👉 서버에서 "addMessage"로 함수가 전달 왔을 시 사용할 이밴트
+  socket.on("bye", () => {
+    addMessage("나 나간다!!!");
+  });
+}
+
+{
+  /** Server */
+  import http from "http";
+  import express from "express";
+  import SocketIO from "socket.io";
+
+  const app = express();
+  const httpServer = http.createServer(app);
+  const wsServer = SocketIO(httpServer);
+
+  // 1 . connection 시킨다
+  wsServer.on("connection", (socket) => {
+    // 2 . "enter_room"함수 응답 시 실행
+    socket.on("enter_room", (roomName, done) => {
+      socket.join(roomName);
+      done();
+      socket.to(roomName).emit("welcome");
+    });
+
+    //////////////////////////////////
+
+    // 3 . "disconnecting"함수 응답 시 실행
+    //   -  👉 "disconnect"와는 다르다 방을 완전히 나가는 개념이 아닌 잠깐 떠나는 개념
+    socket.on("disconnecting", () => {
+      socket.rooms.forEach((room) => {
+        socket.to(room).emit("bye");
+      });
+    });
+
+    //////////////////////////////////
+
+    // 4 . "new_message"함수 응답 시 실행
+    // 💬 서버에서 "new_message"이름의 이밴트 응답 함수
+    //  😅 단 중요 포인트 여기서 room은 client에서 넘긴 값임!!
+    socket.on("new_message", (msg, room, done) => {
+      socket.to(room).emit("toMessage", msg);
+      done();
+    });
+  });
+}
+```
