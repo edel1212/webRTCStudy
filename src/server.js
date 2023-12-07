@@ -53,16 +53,6 @@ wsServer.on("connection", (socket) => {
     socket.to(room).emit("toMessage", `${socket.nickName}: ${msg}`);
     done();
   });
-
-  //////////////////////////////////
-
-  /**
-   * ⭐️ Client에서 받은 닉네임을 socket에 적용
-   *   - socket은 Object 형태이기 떄문에 가능하다!
-   */
-  socket.on("nickName", (nickName) => {
-    socket.nickName = nickName;
-  });
 });
 
 /****************************************** */

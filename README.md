@@ -616,3 +616,58 @@ Zoom Clone using NodeJs, Web RTC
   });
 }
 ```
+
+### 닉네임 지정
+
+- 간단하다 Server에서 connection 이후의 `socket`은 Object이기에 지정하면 된다.!
+
+```javascript
+{
+  /** Client */
+  // 💬 간단하게 io()만으로 소켓 연결 완료..
+  const socket = io();
+
+  let roomName;
+
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const roomNameInput = form.querySelector("#roomName");
+    const nickNameInput = form.querySelector("#nickName");
+    socket.emit(
+      "enter_room",
+      // 💬 {} 형식으로 RoomeName과 NickName을 보내줌
+      { roomName: roomNameInput.value, nickName: nickNameInput.value },
+      () => {
+        /* Do Some Thing... */
+      }
+    );
+  });
+  roomName = roomNameInput.value;
+
+  roomNameInput.value = "";
+}
+
+{
+  /** Server */
+  import http from "http";
+  import express from "express";
+  import SocketIO from "socket.io";
+
+  const app = express();
+  const httpServer = http.createServer(app);
+  const wsServer = SocketIO(httpServer);
+
+  wsServer.on("connection", (socket) => {
+    // 💬 socket자체가 Object이기에 아래와 같이 사용 가능
+    socket.nickName = "초기 닉네임 설정 가능!";
+
+    /** 👉 Client에서 넘기는 roomInfo는 {} 형태이다! */
+    socket.on("enter_room", (roomInfo, done) => {
+      socket.nickName = roomInfo.nickName;
+      // chat Room을 생성함 - 해당 아이디가 있을 경우에는 💯 그냥 입장함 매우 간단!!
+      socket.join(roomInfo.roomName);
+      socket.to(roomInfo.roomName).emit("welcome", socket.nickName);
+    });
+  });
+}
+```
