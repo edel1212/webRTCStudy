@@ -27,10 +27,20 @@ form.addEventListener("submit", (event) => {
     welcome.hidden = true;
     room.hidden = false;
     roomNameTitle.innerText = `Room :: ${roomName}`;
-    const form = room.querySelector("form");
-    form.addEventListener("submit", (event) => {
+
+    // 닉네임 정하기
+    const nickForm = room.querySelector("#nickName");
+    nickForm.addEventListener("submit", (event) => {
       event.preventDefault();
-      const input = room.querySelector("input");
+      const input = room.querySelector("#nickName input");
+      socket.emit("nickName", input.value);
+    });
+
+    // 메세지 보내기
+    const msgForm = room.querySelector("#message");
+    msgForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const input = room.querySelector("#message input");
       socket.emit("new_message", input.value, roomName, () => {
         addMessage(`You : ${input.value}`);
       });

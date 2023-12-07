@@ -16,7 +16,10 @@ html(lang="en")
             div#room
                 h3#rooName
                 ul
-                    form(action="") 
+                    form#nickName
+                        input(placeholder="NickName", required, type="text")
+                        button Send
+                    form#message
                         input(placeholder="Message", required, type="text")
                         button Send
         //- ⭐ 진짜 중요 포인트이다 Client에서도 SocketIO를 불러와 설치해야함!!

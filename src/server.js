@@ -16,6 +16,9 @@ const httpServer = http.createServer(app);
 const wsServer = SocketIO(httpServer);
 
 wsServer.on("connection", (socket) => {
+  // 💬 Object이기에 이렇게 사용 가능
+  socket.nickName = "초기 닉네임 설정 가능!";
+
   // ⭐️ 커넥션된 Socket의 모든 이벤트를 감지 할 수 있는 함수
   socket.onAny((event) => {
     console.log(`Socket Evnet : ${event}`);
@@ -46,8 +49,18 @@ wsServer.on("connection", (socket) => {
 
   // 😅 중요 포인트 여기서 room은 client에서 넘긴 값임!!
   socket.on("new_message", (msg, room, done) => {
-    socket.to(room).emit("toMessage", msg);
+    socket.to(room).emit("toMessage", `${socket.nickName}: ${msg}`);
     done();
+  });
+
+  //////////////////////////////////
+
+  /**
+   * ⭐️ Client에서 받은 닉네임을 socket에 적용
+   *   - socket은 Object 형태이기 떄문에 가능하다!
+   */
+  socket.on("nickName", (nickName) => {
+    socket.nickName = nickName;
   });
 });
 
