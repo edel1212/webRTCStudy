@@ -61,12 +61,12 @@ const addMessage = (message) => {
   ul.appendChild(li);
 };
 
-socket.on("welcome", () => {
-  addMessage("Someone joined!!!");
+socket.on("welcome", (nickName) => {
+  addMessage(`${nickName} joined!!!`);
 });
 
-socket.on("bye", () => {
-  addMessage("나 나간다!!!");
+socket.on("bye", (nickName) => {
+  addMessage(`${nickName} 나간다!!!`);
 });
 
 socket.on("toMessage", (msg) => {

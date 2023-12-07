@@ -33,7 +33,7 @@ wsServer.on("connection", (socket) => {
     console.log(socket.rooms); // 👉 Socket의 Room목록을 볼 수 있음
     done();
 
-    socket.to(roomName).emit("welcome");
+    socket.to(roomName).emit("welcome", socket.nickName);
   });
 
   //////////////////////////////////
@@ -41,7 +41,7 @@ wsServer.on("connection", (socket) => {
   //  👉 "disconnect"와는 다르다 방을 완전히 나가는 개념이 아닌 잠깐 떠나는 개념
   socket.on("disconnecting", () => {
     socket.rooms.forEach((room) => {
-      socket.to(room).emit("bye");
+      socket.to(room).emit("bye", socket.nickName);
     });
   });
 
