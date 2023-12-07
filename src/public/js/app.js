@@ -12,7 +12,8 @@ let roomName;
 
 form.addEventListener("submit", (event) => {
   event.preventDefault();
-  const input = form.querySelector("input");
+  const roomNameInput = form.querySelector("#roomName");
+  const nickNameInput = form.querySelector("#nickName");
   //
   /**
    * ⭐️ SocketIo는 소켓서버에 메세지를 보낼때 send()가 아닌 "emit()"을 사용
@@ -23,32 +24,28 @@ form.addEventListener("submit", (event) => {
    * 💯 : 일반 WebSocket을 사용했을 때는 문자열로 보냈지만 이제는 그럴 필요가 없다!!
    *      - SocketIO 프레임워크가 알아서 다 해결해준다.
    */
-  socket.emit("enter_room", input.value, () => {
-    welcome.hidden = true;
-    room.hidden = false;
-    roomNameTitle.innerText = `Room :: ${roomName}`;
+  socket.emit(
+    "enter_room",
+    { roomName: roomNameInput.value, nickName: nickNameInput.value },
+    () => {
+      welcome.hidden = true;
+      room.hidden = false;
+      roomNameTitle.innerText = `Room :: ${roomName}`;
 
-    // 닉네임 정하기
-    const nickForm = room.querySelector("#nickName");
-    nickForm.addEventListener("submit", (event) => {
-      event.preventDefault();
-      const input = room.querySelector("#nickName input");
-      socket.emit("nickName", input.value);
-    });
-
-    // 메세지 보내기
-    const msgForm = room.querySelector("#message");
-    msgForm.addEventListener("submit", (event) => {
-      event.preventDefault();
-      const input = room.querySelector("#message input");
-      socket.emit("new_message", input.value, roomName, () => {
-        addMessage(`You : ${input.value}`);
+      // 메세지 보내기
+      const msgForm = room.querySelector("#message");
+      msgForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const input = room.querySelector("#message input");
+        socket.emit("new_message", input.value, roomName, () => {
+          addMessage(`You : ${input.value}`);
+        });
       });
-    });
-  });
-  roomName = input.value;
+    }
+  );
+  roomName = roomNameInput.value;
 
-  input.value = "";
+  roomNameInput.value = "";
 });
 
 /**

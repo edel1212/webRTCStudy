@@ -25,15 +25,16 @@ wsServer.on("connection", (socket) => {
   });
   ////////////////////////////////
 
-  socket.on("enter_room", (roomName, done) => {
+  socket.on("enter_room", (roomInfo, done) => {
+    socket.nickName = roomInfo.nickName;
     console.log(socket.id); // 👉 Socket에서 만들어주는 UUID
     console.log(socket.rooms); // 👉 Socket의 Room목록을 볼 수 있음
     // chat Room을 생성함 - 해당 아이디가 있을 경우에는 💯 그냥 입장함 매우 간단!!
-    socket.join(roomName);
+    socket.join(roomInfo.roomName);
     console.log(socket.rooms); // 👉 Socket의 Room목록을 볼 수 있음
     done();
 
-    socket.to(roomName).emit("welcome", socket.nickName);
+    socket.to(roomInfo.roomName).emit("welcome", socket.nickName);
   });
 
   //////////////////////////////////
