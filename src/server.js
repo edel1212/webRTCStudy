@@ -15,13 +15,38 @@ const httpServer = http.createServer(app);
 // 👉 SocketIO 서버 생성
 const wsServer = SocketIO(httpServer);
 
+/**
+ *
+ */
+const getPuplicRooms = () => {
+  const result = [];
+  const {
+    sockets: {
+      adapter: { sids, rooms },
+    },
+  } = wsServer;
+  /**
+   * ✅ Map의 형식은 아래와 같이 돼 있다!!
+   * Map(2) {
+   *         '-6cCVfh8kAQ6ipFqAAAB' => Set(1) { '-6cCVfh8kAQ6ipFqAAAB' },
+   *         'VTjjfDtyYUb3-GIKAAAF' => Set(1) { 'VTjjfDtyYUb3-GIKAAAF' }
+   *     }
+   */
+  rooms.forEach((_, key) => {
+    // 💬 -   : Set(1) { 'lHgRTBMEtT9asvTqAAAB' }
+    // 💬 key : lHgRTBMEtT9asvTqAAAB
+    if (sids.get(key)) return;
+    result.push(key);
+  });
+  return result;
+};
+
 wsServer.on("connection", (socket) => {
   // 💬 Object이기에 이렇게 사용 가능
   socket.nickName = "초기 닉네임 설정 가능!";
 
   // ⭐️ 커넥션된 Socket의 모든 이벤트를 감지 할 수 있는 함수
   socket.onAny((event) => {
-    console.log(wsServer.sockets.adapter);
     console.log(`Socket Evnet : ${event}`);
   });
   ////////////////////////////////
@@ -34,7 +59,7 @@ wsServer.on("connection", (socket) => {
     socket.join(roomInfo.roomName);
     console.log(socket.rooms); // 👉 Socket의 Room목록을 볼 수 있음
     done();
-
+    getPuplicRooms();
     socket.to(roomInfo.roomName).emit("welcome", socket.nickName);
   });
 

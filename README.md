@@ -680,6 +680,7 @@ Zoom Clone using NodeJs, Web RTC
 - 일단 SocketIO에서도 Adapter의 현재상태를 알아볼 수 있다
 
   - `sid`를 통해 private 메세지 보내는것 또한 가능하다!
+    - 현재 연결된 방의 숫자 또한 알 수 있다.
 
   ```javascript
   /** Server */
