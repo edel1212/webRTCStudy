@@ -671,3 +671,75 @@ Zoom Clone using NodeJs, Web RTC
   });
 }
 ```
+
+### Adapter?
+
+- SocketIO에서 Adapter란 쉽게 설명하면 어플리케이션으로 통하는 창문이라 생각하자
+  - 만약 위에서 처럼 InMemory형태로 SocketIO를 구현한 경우 서버가 2대일경우 A -> B 의 소켓 통신은 불가능하다
+    - 공식 홈페이지에서는 `MongoDB`의 Adapter를 사용하면 해결 가능하다함.
+- 일단 SocketIO에서도 Adapter의 현재상태를 알아볼 수 있다
+
+  - `sid`를 통해 private 메세지 보내는것 또한 가능하다!
+
+  ```javascript
+  /** Server */
+  wsServer.on("connection", (socket) => {
+    // ⭐️ 커넥션된 Socket의 모든 이벤트를 감지 할 수 있는 함수
+    socket.onAny((event) => {
+      // 👉 wsServer 객체에서 정보 추출 가능
+      console.log(wsServer.sockets.adapter);
+      /**
+      Adapter {
+        _events: [Object: null prototype] {},
+        _eventsCount: 0,
+        _maxListeners: undefined,
+        nsp: <ref *1> Namespace {
+            _events: [Object: null prototype] { connection: [Function (anonymous)] },
+            _eventsCount: 1,
+            _maxListeners: undefined,
+            sockets: Map(2) {
+            '-6cCVfh8kAQ6ipFqAAAB' => [Socket],
+            'VTjjfDtyYUb3-GIKAAAF' => [Socket]
+            },
+            _fns: [],
+            _ids: 0,
+            server: Server {
+            _events: [Object: null prototype] {},
+            _eventsCount: 0,
+            _maxListeners: undefined,
+            _nsps: [Map],
+            parentNsps: Map(0) {},
+            parentNamespacesFromRegExp: Map(0) {},
+            _path: '/socket.io',
+            clientPathRegex: /^\/socket\.io\/socket\.io(\.msgpack|\.esm)?(\.min)?\.js(\.map)?(?:\?|$)/,
+            _connectTimeout: 45000,
+            _serveClient: true,
+            _parser: [Object],
+            encoder: [Encoder],
+            opts: [Object],
+            _adapter: [class Adapter extends EventEmitter],
+            sockets: [Circular *1],
+            eio: [Server],
+            httpServer: [Server],
+            engine: [Server],
+            [Symbol(kCapture)]: false
+            },
+            name: '/',
+            adapter: [Circular *2],
+            [Symbol(kCapture)]: false
+        },
+        rooms: Map(2) {
+            '-6cCVfh8kAQ6ipFqAAAB' => Set(1) { '-6cCVfh8kAQ6ipFqAAAB' },
+            'VTjjfDtyYUb3-GIKAAAF' => Set(1) { 'VTjjfDtyYUb3-GIKAAAF' }
+        },
+        sids: Map(2) {
+            '-6cCVfh8kAQ6ipFqAAAB' => Set(1) { '-6cCVfh8kAQ6ipFqAAAB' },
+            'VTjjfDtyYUb3-GIKAAAF' => Set(1) { 'VTjjfDtyYUb3-GIKAAAF' }
+        },
+        encoder: Encoder { replacer: undefined },
+        [Symbol(kCapture)]: false
+        }
+        **/
+    });
+  });
+  ```

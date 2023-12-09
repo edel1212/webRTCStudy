@@ -21,6 +21,7 @@ wsServer.on("connection", (socket) => {
 
   // ⭐️ 커넥션된 Socket의 모든 이벤트를 감지 할 수 있는 함수
   socket.onAny((event) => {
+    console.log(wsServer.sockets.adapter);
     console.log(`Socket Evnet : ${event}`);
   });
   ////////////////////////////////
