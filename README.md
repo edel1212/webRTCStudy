@@ -744,3 +744,52 @@ Zoom Clone using NodeJs, Web RTC
     });
   });
   ```
+
+  ### SocketIO의 Private와 Public
+
+  - 간단하게 설명
+    - Private : SID는 소켓이 생성되면 자동으로 생성
+    - Public : `socket.join(방이름);` 사용 시 Private와 Public 두개가 함께 생성 된다.
+
+- Map형태로 Socket서버 객체에 저장되어 있으므로 추출 하여 활용이 가능하다.
+
+  ```javascript
+  import http from "http";
+  import express from "express";
+  import SocketIO from "socket.io";
+
+  const app = express();
+  const httpServer = http.createServer(app);
+  const wsServer = SocketIO(httpServer);
+
+  /**
+   * public Room만 추출 하는 함수
+   * @return {[]}
+   */
+  const getPuplicRooms = () => {
+    const result = [];
+    const {
+      sockets: {
+        adapter: { sids, rooms },
+      },
+    } = wsServer;
+    /**
+     * ✅ Map의 형식은 아래와 같이 돼 있다!!
+     * Map(2) {
+     *         '-6cCVfh8kAQ6ipFqAAAB' => Set(1) { '-6cCVfh8kAQ6ipFqAAAB' },
+     *         'VTjjfDtyYUb3-GIKAAAF' => Set(1) { 'VTjjfDtyYUb3-GIKAAAF' }
+     *     }
+     */
+    rooms.forEach((_, key) => {
+      // 💬 -   : Set(1) { 'lHgRTBMEtT9asvTqAAAB' }
+      // 💬 key : lHgRTBMEtT9asvTqAAAB
+      if (sids.get(key)) return;
+      result.push(key);
+    });
+    return result;
+  };
+
+  wsServer.on("connection", (socket) => {
+    // Do Something...
+  });
+  ```
