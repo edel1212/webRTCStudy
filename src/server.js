@@ -16,15 +16,12 @@ const httpServer = http.createServer(app);
 const wsServer = SocketIO(httpServer);
 
 /**
- *
+ * 공개 방 목록
+ * @return {[]}
  */
-const getPuplicRooms = () => {
+const getPublicRooms = () => {
   const result = [];
-  const {
-    sockets: {
-      adapter: { sids, rooms },
-    },
-  } = wsServer;
+  const { rooms, sids } = wsServer.sockets.adapter;
   /**
    * ✅ Map의 형식은 아래와 같이 돼 있다!!
    * Map(2) {
@@ -59,8 +56,10 @@ wsServer.on("connection", (socket) => {
     socket.join(roomInfo.roomName);
     console.log(socket.rooms); // 👉 Socket의 Room목록을 볼 수 있음
     done();
-    getPuplicRooms();
     socket.to(roomInfo.roomName).emit("welcome", socket.nickName);
+
+    // 👉 방 생성 시 Websocket Server전체 방들에게 메세지를 보냄
+    wsServer.sockets.emit("room_change", getPublicRooms());
   });
 
   //////////////////////////////////
@@ -70,6 +69,18 @@ wsServer.on("connection", (socket) => {
     socket.rooms.forEach((room) => {
       socket.to(room).emit("bye", socket.nickName);
     });
+
+    /**
+     * ❌ 소켓 접속 종료 시 Websocket Server전체 방들에게 메세지를 보내질 것으로 예싱
+     *    - 정상 작동 하지 않음 이유는 disconnecting 자체가 소켓이 방을 떠나기 바로 직전에
+     *      실행 되기 떄문임 따라서 disconnecting -> disconnect 를 사용해야한다.
+     */
+    // wsServer.sockets.emit("room_change", getPublicRooms());
+  });
+
+  // 👍 getPublicRooms()가 정상 작동! - 아예 소켓에서 나가졌을때 발생
+  socket.on("disconnect", () => {
+    wsServer.sockets.emit("room_change", getPublicRooms());
   });
 
   //////////////////////////////////

@@ -768,11 +768,7 @@ Zoom Clone using NodeJs, Web RTC
    */
   const getPuplicRooms = () => {
     const result = [];
-    const {
-      sockets: {
-        adapter: { sids, rooms },
-      },
-    } = wsServer;
+    const { rooms, sids } = wsServer.sockets.adapter;
     /**
      * ✅ Map의 형식은 아래와 같이 돼 있다!!
      * Map(2) {

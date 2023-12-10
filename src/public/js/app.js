@@ -69,3 +69,7 @@ socket.on("bye", (nickName) => {
 socket.on("toMessage", (msg) => {
   addMessage(msg);
 });
+
+socket.on("room_change", (msg) => {
+  console.log(msg);
+});
