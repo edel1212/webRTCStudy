@@ -789,4 +789,7 @@ Zoom Clone using NodeJs, Web RTC
     // Do Something...
   });
   ```
-  ### 비밀 메세지 전송
+  ### 전체 메세지 전달
+  - 기존의 connection 내 함수의 soekct이 아닌 객채로 만든 WebSocket 서버 자체에서 emit을 사용하면 전체에 보내진다!
+  ```javascript
+  ```
