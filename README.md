@@ -926,3 +926,7 @@ Zoom Clone using NodeJs, Web RTC
   });
 }
 ```
+
+## SocktIO UI - SocketIO를 관리가 가능한 UI
+
+- `npm i @socket.io/admin-ui`
