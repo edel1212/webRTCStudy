@@ -929,4 +929,36 @@ Zoom Clone using NodeJs, Web RTC
 
 ## SocktIO UI - SocketIO를 관리가 가능한 UI
 
-- `npm i @socket.io/admin-ui`
+- 설치 방법
+
+  - 1 . `npm i @socket.io/admin-ui`
+  - 2 . Server 코드 수정
+
+    ```javascript
+    // 변경
+    // ❌ import SocketIO from "socket.io";
+    import { Server } from "socket.io";
+    // 추가
+    import { instrument } from "@socket.io/admin-ui";
+
+    // 변경
+    // ❌ const wsServer = SocketIO(httpServer);
+    const wsServer = new Server(httpServer, {
+      cors: {
+        origin: ["https://admin.socket.io"],
+        credentials: true,
+      },
+    });
+
+    // 추가
+    instrument(wsServer, {
+      auth: false,
+    });
+    ```
+
+    - https://admin.socket.io 접속
+      - Server URL: http://localhost:3000
+      - Advanced Options: 체크
+      - WebSocket only?: 체크
+      - Admin namespace: /admin (기본설정)
+      - Path: /socket.io (기본설정)
