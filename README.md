@@ -864,3 +864,65 @@ Zoom Clone using NodeJs, Web RTC
     });
   }
   ```
+
+### 지정 Room에 접속한 유저 확인
+
+- 위에서 설명했던 public room의 내부 데이터를 보면
+  - `Map(2) {'-6cCVfh8kAQ6ipFqAAAB' => Set(1) { '-6cCVfh8kAQ6ipFqAAAB' }, 'VTjjfDtyYUb3-GIKAAAF' => Set(1) { 'VTjjfDtyYUb3-GIKAAAF' }}`형식으로 되어 있는걸 알 수 있다.
+- 이러한 구조를 이용해서 size()를 사용하면 해당 Room에 접속해 있는 사용자 수를 알 수 있다.
+
+```javascript
+{
+  /** Server */
+
+  /**
+   * 방에 들어있는 유저 수를 구하는 함수
+   * @return {Number}
+   */
+  const countUser = (roomName) => {
+    return wsServer.sockets.adapter.rooms.get(roomName)?.size;
+  };
+
+  wsServer.on("connection", (socket) => {
+    // 1 . 방 생성
+    socket.on("enter_room", (roomInfo, done) => {
+      socket.to(roomInfo.roomName).emit(
+        "welcome",
+        socket.nickName,
+        // ⭐️ RoomName을 넘겨 접근한 회원수를 전달
+        countUser(roomInfo.roomName)
+      );
+    });
+
+    socket.on("disconnecting", () => {
+      socket.rooms.forEach((roomName) => {
+        // 👉 해당 반복되는 요소들은 RoomName들이다 private + public
+        socket.to(roomName).emit(
+          "bye",
+          socket.nickName,
+          // ⭐️ RoomName을 넘겨 접근한 회원수를 전달 -1을 해준다
+          countUser(roomName) - 1
+        );
+      });
+    });
+    // - - -
+  }); // - connection
+}
+
+{
+  /** Client */
+
+  const roomNameTitle = document.querySelector("#rooName");
+
+  socket.on("welcome", (nickName, newCount) => {
+    // 받아온 count 적용
+    roomNameTitle.innerText = `Room :: ${roomName} (${newCount})`;
+    addMessage(`${nickName} joined!!!`);
+  });
+
+  socket.on("bye", (nickName, newCount) => {
+    roomNameTitle.innerText = `Room :: ${roomName} (${newCount})`;
+    addMessage(`${nickName} 나간다!!!`);
+  });
+}
+```
