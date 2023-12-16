@@ -38,6 +38,14 @@ const getPublicRooms = () => {
   return result;
 };
 
+/**
+ * 방에 들어있는 유저 수를 구하는 함수
+ * @return {Number}
+ */
+const countUser = (roomName) => {
+  return wsServer.sockets.adapter.rooms.get(roomName)?.size;
+};
+
 wsServer.on("connection", (socket) => {
   // 💬 Object이기에 이렇게 사용 가능
   socket.nickName = "초기 닉네임 설정 가능!";
@@ -56,7 +64,9 @@ wsServer.on("connection", (socket) => {
     socket.join(roomInfo.roomName);
     console.log(socket.rooms); // 👉 Socket의 Room목록을 볼 수 있음
     done();
-    socket.to(roomInfo.roomName).emit("welcome", socket.nickName);
+    socket
+      .to(roomInfo.roomName)
+      .emit("welcome", socket.nickName, countUser(roomInfo.roomName));
 
     // 👉 방 생성 시 Websocket Server전체 방들에게 메세지를 보냄
     wsServer.sockets.emit("room_change", getPublicRooms());
@@ -66,8 +76,9 @@ wsServer.on("connection", (socket) => {
 
   //  👉 "disconnect"와는 다르다 방을 완전히 나가는 개념이 아닌 잠깐 떠나는 개념
   socket.on("disconnecting", () => {
-    socket.rooms.forEach((room) => {
-      socket.to(room).emit("bye", socket.nickName);
+    socket.rooms.forEach((roomName) => {
+      // 👉 해당 반복되는 요소들은 RoomName들이다 private + public
+      socket.to(roomName).emit("bye", socket.nickName, countUser(roomName) - 1);
     });
 
     /**

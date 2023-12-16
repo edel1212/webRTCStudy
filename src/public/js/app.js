@@ -58,11 +58,13 @@ const addMessage = (message) => {
   ul.appendChild(li);
 };
 
-socket.on("welcome", (nickName) => {
+socket.on("welcome", (nickName, newCount) => {
+  roomNameTitle.innerText = `Room :: ${roomName} (${newCount})`;
   addMessage(`${nickName} joined!!!`);
 });
 
-socket.on("bye", (nickName) => {
+socket.on("bye", (nickName, newCount) => {
+  roomNameTitle.innerText = `Room :: ${roomName} (${newCount})`;
   addMessage(`${nickName} 나간다!!!`);
 });
 
