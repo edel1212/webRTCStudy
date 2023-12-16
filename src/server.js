@@ -78,7 +78,10 @@ wsServer.on("connection", (socket) => {
     // wsServer.sockets.emit("room_change", getPublicRooms());
   });
 
-  // 👍 getPublicRooms()가 정상 작동! - 아예 소켓에서 나가졌을때 발생
+  /**
+   * ⭐️ disconnecting 차이를 확실하게 알자!!
+   *    - 👍 getPublicRooms()가 정상 작동! - 아예 소켓에서 나가졌을때 발생 [방이 완전히 사라짐]
+   */
   socket.on("disconnect", () => {
     wsServer.sockets.emit("room_change", getPublicRooms());
   });
@@ -91,32 +94,6 @@ wsServer.on("connection", (socket) => {
     done();
   });
 });
-
-/****************************************** */
-//const wss = new WebSocket.Server({ server });
-// const sockets = [];
-// wss.on("connection", (socket) => {
-//   socket["nickname"] = "지정하지 않은 닉네임 사용자";
-//   sockets.push(socket);
-//   socket.on("message", (msg) => {
-//     const aMessage = JSON.parse(msg);
-//     sockets.forEach((aSocektItem) => {
-//       switch (aMessage.type) {
-//         case "new_message":
-//           aSocektItem.send(
-//             `${socket.nickname} : ${aMessage.payload.toString("utf8")}`
-//           );
-//           break;
-//         case "nickname":
-//           // ⭐️ socket 자체는 Object이기에 아래 처럼 사용이 가능하다
-//           socket["nickname"] = aMessage.payload;
-//           break;
-//       } // switch
-//     });
-//   });
-//   socket.on("close", () => console.log("⭐️ Client에서 Sokect 중단 시 실행❌"));
-// });
-/****************************************** */
 
 // 포트 설정
 httpServer.listen(3000);

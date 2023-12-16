@@ -70,6 +70,13 @@ socket.on("toMessage", (msg) => {
   addMessage(msg);
 });
 
-socket.on("room_change", (msg) => {
-  console.log(msg);
+socket.on("room_change", (rooms) => {
+  const roomList = welcome.querySelector("ul");
+  // 초기화
+  roomList.innerHTML = "";
+  rooms.forEach((room) => {
+    const li = document.createElement("li");
+    li.innerText = room;
+    roomList.append(li);
+  });
 });
