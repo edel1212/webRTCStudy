@@ -70,6 +70,7 @@ socket.on("toMessage", (msg) => {
   addMessage(msg);
 });
 
+// 소켓에서 응답이 올경우 방 목록 업데이트
 socket.on("room_change", (rooms) => {
   const roomList = welcome.querySelector("ul");
   // 초기화

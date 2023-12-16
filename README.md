@@ -748,10 +748,11 @@ Zoom Clone using NodeJs, Web RTC
   ### SocketIO의 Private와 Public
 
   - 간단하게 설명
+
     - Private : SID는 소켓이 생성되면 자동으로 생성
     - Public : `socket.join(방이름);` 사용 시 Private와 Public 두개가 함께 생성 된다.
 
-- Map형태로 Socket서버 객체에 저장되어 있으므로 추출 하여 활용이 가능하다.
+    - Map형태로 Socket서버 객체에 저장되어 있으므로 추출 하여 활용이 가능하다.
 
   ```javascript
   import http from "http";
@@ -793,7 +794,73 @@ Zoom Clone using NodeJs, Web RTC
   ### 전체 메세지 전달
 
   - 기존의 connection 내 함수의 soekct이 아닌 객채로 만든 WebSocket 서버 자체에서 emit을 사용하면 전체에 보내진다!
+  - 해당 기능을 활용해서 생성 및 제거 되는 방 목록을 가져오는데 활용했다.
+  - 헷갈리기 쉬운 개념
+    - `disconnecting` 이벤트와 `disconnect` 이벤트
+      - 두 이벤트는 소켓을 떠나는 공통점이 있지만 사용처가 다르다
+      - `disconnecting` (연결 해제 하고있는 중 ~ 개념)
+        - 소켓이 연결을 끊기 직전에 서버 측에서 트리거됩니다. 일반적으로 클라이언트가 명시적으로 연결을 끊거나 서버가 어떤 이유로 소켓을 연결 해제하려고 감지될 때 발생합니다.
+        - 소켓이 완전히 연결 해제되기 전에 서버 측에서 정리 작업이나 추가 작업을 수행하려는 경우 유용합니다. 예를 들어 사용자 목록을 업데이트하거나 다른 클라이언트에 연결 해제를 알리거나 사용자와 관련된 데이터를 저장하려는 경우입니다.
+      - `disconnect` (연결을 해제완료! 개념)
+      - 이벤트는 반면에 소켓이 연결 해제된 후에 서버 측에서 트리거됩니다. 이는 연결 해제 프로세스가 완료되었으며 소켓이 더 이상 서버에 연결되어 있지 않음을 나타냅니다.
+      - 이 이벤트는 소켓 연결 해제에 반응하려는 경우에 유용합니다. 예를 들어 연결 해제를 기록하거나 사용자 상태를 업데이트하는 경우입니다.
 
   ```javascript
+  {
+    /** Server */
+    import http from "http";
+    import express from "express";
+    import SocketIO from "socket.io";
 
+    const app = express();
+    const httpServer = http.createServer(app);
+    const wsServer = SocketIO(httpServer);
+
+    /**
+     * 공개 방 목록 함수
+     * @return {[]}
+     */
+    const getPublicRooms = () => {
+      const result = [];
+      const { rooms, sids } = wsServer.sockets.adapter;
+      rooms.forEach((_, key) => {
+        if (sids.get(key)) return;
+        result.push(key);
+      });
+      return result;
+    };
+
+    wsServer.on("connection", (socket) => {
+      // 🦮 방 생성
+      socket.on("enter_room", (roomInfo, done) => {
+        // 👉  Websocket Server전체 방들에게 메세지를 보냄 - 포인트는 "wsServer" 👍
+        wsServer.sockets.emit("room_change", getPublicRooms());
+      });
+
+      //  🦮 소켓 연결 해제 요청
+      socket.on("disconnecting", () => {
+        // ⭐️ "disconnect"와는 다르다 방을 완전히 나가는 개념이 아닌 잠깐 떠나는 개념
+        // wsServer.sockets.emit("room_change", getPublicRooms());
+      });
+
+      //  🦮 소켓 연결 해제 완료
+      socket.on("disconnect", () => {
+        wsServer.sockets.emit("room_change", getPublicRooms());
+      });
+    }); // - connection Function
+  }
+
+  {
+    /** Client */
+    socket.on("room_change", (rooms) => {
+      const roomList = welcome.querySelector("ul");
+      // 초기화
+      roomList.innerHTML = "";
+      rooms.forEach((room) => {
+        const li = document.createElement("li");
+        li.innerText = room;
+        roomList.append(li);
+      });
+    });
+  }
   ```
