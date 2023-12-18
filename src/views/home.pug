@@ -9,6 +9,9 @@ html(lang="en")
         header
             h1 Noom 
         main
-            video#myFace(autoplay,playsinline, width="400",heigh="400")
+            div#myStream
+                video#myFace(autoplay,playsinline, width="400",heigh="400")
+                button#mute 음소거
+                button#camera 카메라 끄기
         script(src="/socket.io/socket.io.js")    
         script(src="/public/js/app.js")

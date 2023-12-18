@@ -2,7 +2,31 @@ const socket = io();
 
 const myFace = document.querySelector("#myFace");
 
+const cameraBtn = document.querySelector("#camera");
+const muteBtn = document.querySelector("#mute");
+
+cameraBtn.addEventListener("click", () => {
+  if (!cameraOff) {
+    cameraBtn.innerHTML = "카메라 켜기";
+  } else {
+    cameraBtn.innerHTML = "카메라 끄기";
+  } //if else
+  cameraOff = !cameraOff;
+});
+muteBtn.addEventListener("click", () => {
+  if (!muted) {
+    muteBtn.innerHTML = "음소거";
+  } else {
+    muteBtn.innerHTML = "음소거 해제";
+  } //if else
+  muted = !muted;
+});
+
 let myStream;
+// 음소거 스위치
+let muted = false;
+// 카메라 스위치
+let cameraOff = false;
 
 async function getMedia() {
   try {
