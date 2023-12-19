@@ -962,3 +962,57 @@ Zoom Clone using NodeJs, Web RTC
       - WebSocket only?: 체크
       - Admin namespace: /admin (기본설정)
       - Path: /socket.io (기본설정)
+
+## 카메라와 Web Video 연결하기
+
+- 별거 없이 javascript만으로 해결이 가능하다.
+
+```javascript
+// ⭐ video 태그
+const myFace = document.querySelector("#myFace");
+
+const cameraBtn = document.querySelector("#camera");
+const muteBtn = document.querySelector("#mute");
+
+cameraBtn.addEventListener("click", () => {
+  if (!cameraOff) {
+    cameraBtn.innerHTML = "카메라 켜기";
+  } else {
+    cameraBtn.innerHTML = "카메라 끄기";
+  } //if else
+  cameraOff = !cameraOff;
+});
+muteBtn.addEventListener("click", () => {
+  if (!muted) {
+    muteBtn.innerHTML = "음소거";
+  } else {
+    muteBtn.innerHTML = "음소거 해제";
+  } //if else
+  muted = !muted;
+});
+
+let myStream;
+// 음소거 스위치
+let muted = false;
+// 카메라 스위치
+let cameraOff = false;
+
+async function getMedia() {
+  try {
+    myStream = await navigator.mediaDevices.getUserMedia(
+      // 옵션 설정 값
+      {
+        audio: cameraOff,
+        video: muted,
+      }
+    );
+    // 💬 접근 허용 창이 뜬다!
+    console.log(myStream);
+    myFace.srcObject = myStream;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+getMedia();
+```
