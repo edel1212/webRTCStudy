@@ -1022,27 +1022,83 @@ getMedia();
 - 헷갈릴 수 있는게 처음 객체 생성부터 전역 변수를 넣는 방법 적용 하였지만 에러 발생
   - 만들어진 stream객체를 활용해서 정보를 받아온 다음 설정하면 해결이 가능하다
   - 👉 전역변수의 값을 변경해도 이미 생성된 객체에는 적용 되지 않는다! << 당연한 결과!
-- 에러 코드
+- 만들어진 stream의 내장 함수로 처리가 가능하다.
+  - `getVideoTracks()` 및 `getAudioTracks()`를 사용해 제어가 가능하다
+- 예시
 
-  ```javascript
-  let myStream;
-  // 음소거 스위치
-  let muted = false;
-  // 카메라 스위치
-  let cameraOff = false;
+  - 에러 코드
 
-  async function getMedia() {
-    try {
-      myStream = await navigator.mediaDevices.getUserMedia({
-        // 💬 적용은 되나 변경이 안되고 Stream 객체는 둘다 false일 경우 예외로 생각하고 진행된다.
-        audio: muted,
-        video: cameraOff,
-      });
-      // 💬 접근 허용 창이 뜬다!
-      console.log(myStream);
-      myFace.srcObject = myStream;
-    } catch (error) {
-      console.log(error);
+    ```javascript
+    let myStream;
+    // 음소거 스위치
+    let muted = false;
+    // 카메라 스위치
+    let cameraOff = false;
+
+    async function getMedia() {
+      try {
+        myStream = await navigator.mediaDevices.getUserMedia({
+          // 💬 적용은 되나 변경이 안되고 Stream 객체는 둘다 false일 경우 예외로 생각하고 진행된다.
+          audio: muted,
+          video: cameraOff,
+        });
+        // 💬 접근 허용 창이 뜬다!
+        console.log(myStream);
+        myFace.srcObject = myStream;
+      } catch (error) {
+        console.log(error);
+      }
     }
-  }
-  ```
+    ```
+
+  - 정상 코드
+
+    ```javascript
+    let myStream;
+    // 음소거 스위치
+    let muted = false;
+    // 카메라 스위치
+    let cameraOff = false;
+
+    async function getMedia() {
+      try {
+        myStream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+          video: true,
+        });
+        // 💬 접근 허용 창이 뜬다!
+        console.log(myStream);
+        myFace.srcObject = myStream;
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    getMedia();
+
+    /** 버튼 Click Event */
+    cameraBtn.addEventListener("click", () => {
+      if (!cameraOff) {
+        cameraBtn.innerHTML = "카메라 켜기";
+      } else {
+        cameraBtn.innerHTML = "카메라 끄기";
+      } //if else
+      cameraOff = !cameraOff;
+      // 💬 만들어진 객체의 getAudioTracks()를 받아서 Loop문으로 처리
+      myStream.getVideoTracks().forEach((track) => {
+        track.enabled = !track.enabled;
+      });
+    });
+    muteBtn.addEventListener("click", () => {
+      if (!muted) {
+        muteBtn.innerHTML = "음소거";
+      } else {
+        muteBtn.innerHTML = "음소거 해제";
+      } //if else
+      muted = !muted;
+      // 💬 만들어진 객체의 getAudioTracks()를 받아서 Loop문으로 처리
+      myStream.getAudioTracks().forEach((track) => {
+        track.enabled = !track.enabled;
+      });
+    });
+    ```
