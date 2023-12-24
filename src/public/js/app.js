@@ -4,6 +4,7 @@ const myFace = document.querySelector("#myFace");
 
 const cameraBtn = document.querySelector("#camera");
 const muteBtn = document.querySelector("#mute");
+const cameraSelect = document.querySelector("#cameras");
 
 let myStream;
 // 음소거 스위치
@@ -11,6 +12,10 @@ let muted = false;
 // 카메라 스위치
 let cameraOff = false;
 
+/**
+ * Stream객체를 만든는 함수
+ * ⭐️ async로 동작 해야한다. - 동기식 처리
+ */
 async function getMedia() {
   try {
     myStream = await navigator.mediaDevices.getUserMedia({
@@ -20,10 +25,31 @@ async function getMedia() {
     // 💬 접근 허용 창이 뜬다!
     console.log(myStream);
     myFace.srcObject = myStream;
+    // 👉 카메라를 가져오는 함수 실행
+    await getCameras();
   } catch (error) {
     console.log(error);
   }
 }
+
+/**
+ * 접근되는 카메라 디바이스를 가져옴
+ *  */
+const getCameras = async () => {
+  try {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const cameras = devices.filter((item) => item.kind === "videoinput");
+    console.log(cameras);
+    cameras.forEach((camera) => {
+      const option = document.createElement("option");
+      option.value = camera.deviceId;
+      option.innerText = camera.label;
+      cameraSelect.appendChild(option);
+    });
+  } catch (e) {
+    console.log(e);
+  }
+};
 
 getMedia();
 
