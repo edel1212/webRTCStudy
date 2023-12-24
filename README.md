@@ -1017,7 +1017,7 @@ async function getMedia() {
 getMedia();
 ```
 
-### 화면 연결 및 음성연결 설정 방버
+### 화면 연결 및 음성연결 설정 방법
 
 - 헷갈릴 수 있는게 처음 객체 생성부터 전역 변수를 넣는 방법 적용 하였지만 에러 발생
   - 만들어진 stream객체를 활용해서 정보를 받아온 다음 설정하면 해결이 가능하다
@@ -1101,4 +1101,49 @@ getMedia();
         track.enabled = !track.enabled;
       });
     });
+    ```
+
+### 연결된 디바이스 정보 가져오기 및 목록UI 만들기
+
+- navigator 객체란?
+  - navigator 객체는 브라우저와 관련된 정보를 컨트롤 합니다. 브라우저에 대한 버전, 정보, 종류 등 관련된 정보를 제공합니다.
+- `navigator.mediaDevices.enumerateDevices()`함수를 활용하면 쉽게 해결 가능하다.
+
+  - 주의해야할 점은 stream을 만들때 같이 호출 할거기 때문에 **async 와 await**를 사용해 줘야한다.
+
+    ```javascript
+    async function getMedia() {
+      try {
+        myStream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+          video: true,
+        });
+        myFace.srcObject = myStream;
+        // 👉 카메라를 가져오는 함수 실행
+        await getCameras();
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    /**
+     * 접근되는 카메라 디바이스를 가져옴
+     *  */
+    const getCameras = async () => {
+      try {
+        // 👉 navigator객체를 활용 내장되어 있음
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        // 👉 받아온 디바이스 정보를 토대로 "kind" 속성이 비디오 인것만 필터링
+        const cameras = devices.filter((item) => item.kind === "videoinput");
+        // 👉 option Dom을 생성해서 append 시킴
+        cameras.forEach((camera) => {
+          const option = document.createElement("option");
+          option.value = camera.deviceId;
+          option.innerText = camera.label;
+          cameraSelect.appendChild(option);
+        });
+      } catch (e) {
+        console.log(e);
+      }
+    };
     ```
