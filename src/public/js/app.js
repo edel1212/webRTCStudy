@@ -16,7 +16,7 @@ let cameraOff = false;
  * Stream객체를 만든는 함수
  * ⭐️ async로 동작 해야한다. - 동기식 처리
  */
-async function getMedia() {
+async function getMedia(deviceId) {
   try {
     myStream = await navigator.mediaDevices.getUserMedia({
       audio: true,
@@ -76,4 +76,11 @@ muteBtn.addEventListener("click", () => {
   myStream.getAudioTracks().forEach((track) => {
     track.enabled = !track.enabled;
   });
+});
+
+/**
+ * 카메라 목록 변경 시 Event
+ */
+cameraSelect.addEventListener("input", (camersSelect) => {
+  getMedia(camersSelect.target.value);
 });
