@@ -36,6 +36,33 @@ async function getMedia(deviceId) {
  * 접근되는 카메라 디바이스를 가져옴
  *  */
 const getCameras = async () => {
+  const initalConstrains = {
+    audio: true,
+    video: { facingMode: "user" },
+  };
+
+  /*** ✅ 디바이스 지정
+   * 💬 디바이스 아이디를 지정 후 없으면 알아서 다른 접근 가능한 디바이스로 연결함
+   * {
+   * video: {
+   *   deviceId: myPreferredCameraDeviceId,
+   *  },
+   * }
+   * --------------------------------------------------------------------
+   * 💬 디바이스 아이디를 지정 후 없으면 연결 하지 않음
+   * {
+   * video: {
+   * deviceId: {
+   *   exact: myExactCameraOrBustDeviceId,
+   *  },
+   * },
+   *}
+   */
+
+  const cameraConstrains = {
+    video: {},
+  };
+
   try {
     const devices = await navigator.mediaDevices.enumerateDevices();
     const cameras = devices.filter((item) => item.kind === "videoinput");
