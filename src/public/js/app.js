@@ -17,28 +17,18 @@ let cameraOff = false;
  * ⭐️ async로 동작 해야한다. - 동기식 처리
  */
 async function getMedia(deviceId) {
-  try {
-    myStream = await navigator.mediaDevices.getUserMedia({
-      audio: true,
-      video: true,
-    });
-    // 💬 접근 허용 창이 뜬다!
-    console.log(myStream);
-    myFace.srcObject = myStream;
-    // 👉 카메라를 가져오는 함수 실행
-    await getCameras();
-  } catch (error) {
-    console.log(error);
-  }
-}
-
-/**
- * 접근되는 카메라 디바이스를 가져옴
- *  */
-const getCameras = async () => {
+  //  💬 디바이스ID가 없을 경우 Default 설정
   const initalConstrains = {
     audio: true,
     video: { facingMode: "user" },
+  };
+
+  //  💬 디바이스ID가 있을 경우 카메라 ID설정
+  const cameraConstrains = {
+    audio: true,
+    video: {
+      deviceId: { exact: deviceId },
+    },
   };
 
   /*** ✅ 디바이스 지정
@@ -59,18 +49,45 @@ const getCameras = async () => {
    *}
    */
 
-  const cameraConstrains = {
-    video: {},
-  };
-
   try {
+    myStream = await navigator.mediaDevices.getUserMedia(
+      deviceId ? cameraConstrains : initalConstrains
+    );
+    // 💬 스트림 객체 주입
+    myFace.srcObject = myStream;
+    // 디바이스ID가 없다면 Select UI를 그리지 않음
+    if (!deviceId) {
+      await getCameras();
+    } // ifs
+    await getCameras();
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+/**
+ *  💬 접근되는 카메라 디바이스를 가져온 후 Select Dom을 그림
+ *  */
+const getCameras = async () => {
+  try {
+    // 초기화
+    cameraSelect.innerHTML = "<option value='device'>Face Camera</option>";
+
     const devices = await navigator.mediaDevices.enumerateDevices();
     const cameras = devices.filter((item) => item.kind === "videoinput");
-    console.log(cameras);
+    // 현재 사용중인 카메라 Lable을 가져옴
+    const currentCamera = myStream.getVideoTracks()[0];
+
     cameras.forEach((camera) => {
       const option = document.createElement("option");
       option.value = camera.deviceId;
       option.innerText = camera.label;
+
+      // 💬 카메라 레이블이 같을 경우에 Selected!
+      if (currentCamera.label === camera.label) {
+        option.selected = true;
+      }
+
       cameraSelect.appendChild(option);
     });
   } catch (e) {
