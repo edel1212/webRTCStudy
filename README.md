@@ -1147,3 +1147,81 @@ getMedia();
       }
     };
     ```
+
+### 선택된 카메라로 스위칭 및 초기화면 선택된 카메라로 Selected
+
+- `getVideoTracks()`함수를 이용하면 배열 형태로 사용중인 미디어 정보를 받아올 수 있음
+- 디바이스 지정 시 옵션 차이 `exact` 사용에 따라 다르다
+  - `exact` 사용 시 무조건 해당 디바이스 ID를 찾아 적용 없으면 에러 반환
+    - `video: {deviceId: myPreferredCameraDeviceId,}`
+  - `exact` 미사용 시 해당 ID가 없다면 사용 할 수 있는 아무 카메라로 자동 연경
+    - `video: {deviceId: {exact: myExactCameraOrBustDeviceId} }`
+
+```javascript
+let myStream;
+
+// ⭐️  Video 시작
+getMedia();
+async function getMedia(deviceId) {
+  //  💬 디바이스ID가 없을 경우 Default 설정
+  const initalConstrains = {
+    audio: true,
+    video: { facingMode: "user" },
+  };
+
+  //  💬 디바이스ID가 있을 경우 카메라 ID설정
+  const cameraConstrains = {
+    audio: true,
+    video: {
+      deviceId: { exact: deviceId },
+    },
+  };
+
+  try {
+    // 💬 삼항연산자를 통해 Media 옵션을 주입
+    myStream = await navigator.mediaDevices.getUserMedia(
+      deviceId ? cameraConstrains : initalConstrains
+    );
+
+    myFace.srcObject = myStream;
+
+    // 디바이스ID가 없다면 Select UI를 그리지 않음
+    if (!deviceId) {
+      await getCameras();
+    } // ifs
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+const getCameras = async () => {
+  try {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const cameras = devices.filter((item) => item.kind === "videoinput");
+    // ⭐️ 현재 사용중인 카메라 Lable을 가져옴
+    const currentCamera = myStream.getVideoTracks()[0];
+
+    cameras.forEach((camera) => {
+      const option = document.createElement("option");
+      option.value = camera.deviceId;
+      option.innerText = camera.label;
+
+      // 💬 카메라 레이블이 같을 경우에 Selected!
+      if (currentCamera.label === camera.label) {
+        option.selected = true;
+      }
+
+      cameraSelect.appendChild(option);
+    });
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+/**
+ * 카메라 목록 변경 시 Event
+ */
+cameraSelect.addEventListener("input", (camersSelect) => {
+  getMedia(camersSelect.target.value);
+});
+```

@@ -59,7 +59,6 @@ async function getMedia(deviceId) {
     if (!deviceId) {
       await getCameras();
     } // ifs
-    await getCameras();
   } catch (error) {
     console.log(error);
   }
@@ -70,9 +69,6 @@ async function getMedia(deviceId) {
  *  */
 const getCameras = async () => {
   try {
-    // 초기화
-    cameraSelect.innerHTML = "<option value='device'>Face Camera</option>";
-
     const devices = await navigator.mediaDevices.enumerateDevices();
     const cameras = devices.filter((item) => item.kind === "videoinput");
     // 현재 사용중인 카메라 Lable을 가져옴
