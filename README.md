@@ -1237,7 +1237,7 @@ cameraSelect.addEventListener("input", (camersSelect) => {
 
 ### RTC 사용 _Step1_
 
-- `peer-to-peer` 연결을 위한 SocketIO를 통한 서버 `signaling`
+- `peer-to-peer` 연결을 위한 SocketIO 연결
 
 ```javascript
 {
@@ -1321,3 +1321,98 @@ cameraSelect.addEventListener("input", (camersSelect) => {
   httpServer.listen(3000);
 }
 ```
+
+### RTC 사용 _Step2_
+
+- `SocketIO`를 사용해 Signaling Prceess (Peer A 입장)
+- Peer A
+  - `getUserMedia()` : `await navigator.mediaDevices.getUserMedia()`를 사용해서 사용자 미디어 언결 및 객체 생성
+  - `addStream()` : `new RTCPeerConnection()` 객체 생성 후 `addTrack()`을 사용해서 주입
+  - `createOffer()` : `new RTCPeerConnection()`의 `await myPeerConnection.createOffer()`사용 해서 offer 생성
+  - `setLocalDescription` : `new RTCPeerConnection()`의 `myPeerConnection.setLocalDescription(offer);`로 전달
+    - 여기서 offers매개변수는 위에서 만든 offer이다
+- 코드
+
+  ```javascript
+  {
+    /** ======= */
+    /** Client */
+    /** ======= */
+
+    const startMedia = async () => {
+      // ✨ 1. 미디어 생성
+      await getMedia();
+      // ✨ 2 . WebRTC 객체 생성
+      makeConnection();
+    };
+
+    // Form 전송 버튼 클릭 시
+    welcomeForm.addEventListener("submit", (event) => {
+      // SocketIO에 Event 생성
+      socket.emit("join_room", input.value, startMedia);
+    });
+
+    /** Socket Code  */
+
+    // ✅ 있던 사람이 받는 SocketIO Event
+    socket.on("welcome", async () => {
+      // ✨ 4. offer를 생성함
+      const offer = await myPeerConnection.createOffer();
+      // ✨ 5. offer를 대상에게 전달함!!
+      myPeerConnection.setLocalDescription(offer);
+
+      console.log("offer를 생성 후 서버로 전달");
+
+      // 👉 SocketIO의 Event를 통해 offer와 대상인 RoomName을 보냄
+      socket.emit("offer", offer, roomName);
+    });
+
+    // ✅ 처음 들어오는 사람이 받을 SocketIO Event
+    socket.on("offer", (offer) => {
+      console.log("offer", offer);
+    });
+
+    /** RTC Code  */
+    const makeConnection = () => {
+      myPeerConnection = new RTCPeerConnection();
+      // ✨ 3 . 현재 미디어 정보를 Loop하며 addSream을 해줌
+      myStream.getTracks().forEach((track) => {
+        myPeerConnection.addTrack(track, myStream);
+      });
+    };
+  }
+
+  {
+    /** ======= */
+    /** Server */
+    /** ======= */
+    import http from "http";
+    import express from "express";
+    import SocketIO from "socket.io";
+
+    const app = express();
+
+    const httpServer = http.createServer(app);
+    const wsServer = SocketIO(httpServer);
+
+    wsServer.on("connection", (socket) => {
+      //
+
+      // ✨ 1 . 방 생성 이벤트를 받음
+      socket.on("join_room", (roomName, done) => {
+        socket.join(roomName);
+        // ✨ 2 . 받은 미디어 생성 함수 실행
+        done();
+        // ✨ 3 . Client에 welcome 이벤트 전달
+        socket.to(roomName).emit("welcome");
+      });
+
+      // ✨ 4 . offer 이벤트를 받은 후 해당 Room 대상자들에게 offer 전달
+      socket.on("offer", (offer, roomName) => {
+        socket.to(roomName).emit("offer", offer);
+      });
+
+      //__
+    });
+  }
+  ```

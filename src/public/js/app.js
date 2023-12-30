@@ -124,6 +124,7 @@ const startMedia = async () => {
   welcome.hidden = true;
   call.hidden = false;
   await getMedia();
+  // 👉  WebRTC 객체 생성
   makeConnection();
 };
 
