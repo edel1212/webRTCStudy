@@ -1225,3 +1225,12 @@ cameraSelect.addEventListener("input", (camersSelect) => {
   getMedia(camersSelect.target.value);
 });
 ```
+
+## WebRTC API
+
+- WebRTC란 web Real-Time-Communication을 뜻한다.
+- `peer-to-peer`방식이다.
+  - 서버를 거지치지 않고 오디와 텍스트가 직접 대상에게 전해지다는 것이다.
+    - `signaling`을 해줄 서버가 필요하긴하다.
+      - 상대가 어디에 있는지 IP주소가 뭔지 포트 및 방화벽 등등 상대의 정보를 알기 위한 용도로만 쓰인다.
+  - SoketIO를 사용하면 오디오와 텍스트가 서버로 전송되고 서버가 대상에게 전달하는 방식임
