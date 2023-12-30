@@ -1,29 +1,30 @@
 const socket = io();
 
+/** Video Control   */
 const myFace = document.querySelector("#myFace");
-
 const cameraBtn = document.querySelector("#camera");
 const muteBtn = document.querySelector("#mute");
 const cameraSelect = document.querySelector("#cameras");
 
+/** Room Control  */
+const welcome = document.querySelector("#welcome");
+const call = document.querySelector("#call");
+
 let myStream;
-// 음소거 스위치
 let muted = false;
-// 카메라 스위치
 let cameraOff = false;
 
 /**
- * Stream객체를 만든는 함수
- * ⭐️ async로 동작 해야한다. - 동기식 처리
+ * Stream 객체 생성 및 주입
+ * - Video를 연결함
  */
 async function getMedia(deviceId) {
-  //  💬 디바이스ID가 없을 경우 Default 설정
+  // 카메라 ❌
   const initalConstrains = {
     audio: true,
     video: { facingMode: "user" },
   };
-
-  //  💬 디바이스ID가 있을 경우 카메라 ID설정
+  // 카메라 👌
   const cameraConstrains = {
     audio: true,
     video: {
@@ -31,45 +32,29 @@ async function getMedia(deviceId) {
     },
   };
 
-  /*** ✅ 디바이스 지정
-   * 💬 디바이스 아이디를 지정 후 없으면 알아서 다른 접근 가능한 디바이스로 연결함
-   * {
-   * video: {
-   *   deviceId: myPreferredCameraDeviceId,
-   *  },
-   * }
-   * --------------------------------------------------------------------
-   * 💬 디바이스 아이디를 지정 후 없으면 연결 하지 않음
-   * {
-   * video: {
-   * deviceId: {
-   *   exact: myExactCameraOrBustDeviceId,
-   *  },
-   * },
-   *}
-   */
-
   try {
     myStream = await navigator.mediaDevices.getUserMedia(
+      // 삼항 사용
       deviceId ? cameraConstrains : initalConstrains
     );
-    // 💬 스트림 객체 주입
+    // 스트림 객체 주입
     myFace.srcObject = myStream;
-    // 디바이스ID가 없다면 Select UI를 그리지 않음
-    if (!deviceId) {
-      await getCameras();
-    } // ifs
+
+    // 최초 한번 실행 - deviceId가 없을 경우에만 그려줌
+    if (!deviceId) await getCameras();
   } catch (error) {
     console.log(error);
-  }
+  } // try - catch
 }
 
 /**
- *  💬 접근되는 카메라 디바이스를 가져온 후 Select Dom을 그림
+ * 접근 가능한 디바이스 정보를 가져와 UI생성
  *  */
 const getCameras = async () => {
   try {
+    // 현재 사용자의 디바이스 정보를 가져옴
     const devices = await navigator.mediaDevices.enumerateDevices();
+    // 카메라 정보만 Filter
     const cameras = devices.filter((item) => item.kind === "videoinput");
     // 현재 사용중인 카메라 Lable을 가져옴
     const currentCamera = myStream.getVideoTracks()[0];
@@ -79,48 +64,45 @@ const getCameras = async () => {
       option.value = camera.deviceId;
       option.innerText = camera.label;
 
-      // 💬 카메라 레이블이 같을 경우에 Selected!
-      if (currentCamera.label === camera.label) {
-        option.selected = true;
-      }
+      // lable이 같다면  Selected!
+      if (currentCamera.label === camera.label) option.selected = true;
 
       cameraSelect.appendChild(option);
-    });
+    }); // forEach
   } catch (e) {
     console.log(e);
-  }
+  } // try - catch
 };
 
-getMedia();
+//getMedia();
 
-/** 버튼 Click Event */
+// 카메라 설정 Click Event
 cameraBtn.addEventListener("click", () => {
-  if (!cameraOff) {
-    cameraBtn.innerHTML = "카메라 켜기";
-  } else {
-    cameraBtn.innerHTML = "카메라 끄기";
-  } //if else
+  // UI처라
+  cameraBtn.innerHTML = !cameraOff ? "카메라 켜기" : "카메라 끄기";
+  // 전역변수 변경
   cameraOff = !cameraOff;
+
+  // Stream객체의 Video Track enabled 처리
   myStream.getVideoTracks().forEach((track) => {
     track.enabled = !track.enabled;
-  });
-});
-muteBtn.addEventListener("click", () => {
-  if (!muted) {
-    muteBtn.innerHTML = "음소거";
-  } else {
-    muteBtn.innerHTML = "음소거 해제";
-  } //if else
-  muted = !muted;
-  // 💬 만들어진 객체의 getAudioTracks()를 받아서 Loop문으로 처리
-  myStream.getAudioTracks().forEach((track) => {
-    track.enabled = !track.enabled;
-  });
+  }); // forEach
 });
 
-/**
- * 카메라 목록 변경 시 Event
- */
+// 음소거 버튼  Click Event
+muteBtn.addEventListener("click", () => {
+  // UI처리
+  muteBtn.innerHTML = !muted ? "음소거" : "음소거 해제";
+  // 전역변수 변경
+  muted = !muted;
+
+  // Stream객체의 Audio Track을 받아와 enabled 처리
+  myStream.getAudioTracks().forEach((track) => {
+    track.enabled = !track.enabled;
+  }); // forEach
+});
+
+// 카메라 목록 Select Event
 cameraSelect.addEventListener("input", (camersSelect) => {
   getMedia(camersSelect.target.value);
 });
