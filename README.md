@@ -1234,3 +1234,87 @@ cameraSelect.addEventListener("input", (camersSelect) => {
     - `signaling`을 해줄 서버가 필요하긴하다.
       - 상대가 어디에 있는지 IP주소가 뭔지 포트 및 방화벽 등등 상대의 정보를 알기 위한 용도로만 쓰인다.
   - SoketIO를 사용하면 오디오와 텍스트가 서버로 전송되고 서버가 대상에게 전달하는 방식임
+- **webRTC 사용 전** `peer-to-peer` 연결을 위한 SocketIO를 통한 서버 `signaling`
+
+  ```javascript
+  {
+    /** ======= */
+    /** Client */
+    /** ======= */
+
+    // SoketIO Object
+    const socket = io();
+
+    // 👉 이전 getMedia를 부르는 부분은 주석 - SocketIO연결 후 실행
+    //getMedia();
+
+    /******************************************* */
+    /***********    Room Script     ************ */
+    /******************************************* */
+
+    /** Room Control  */
+    const welcome = document.querySelector("#welcome");
+    const call = document.querySelector("#call");
+    const welcomeForm = welcome.querySelector("form");
+
+    /** UI init */
+    call.hidden = true;
+
+    // ⭐️ 시작 함수 SocketIO 마지막 인자로 넣으므로 최종적 실행 함수
+    const startMedia = () => {
+      welcome.hidden = true;
+      call.hidden = false;
+      getMedia();
+    };
+
+    // Form 전송 버튼 클릭 시
+    welcomeForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const input = welcomeForm.querySelector("input");
+      //  💯 SocketIO에 방 생성 요청 <<<<<<<< 해당 코드가 포인트!!!
+      socket.emit("join_room", input.value, startMedia);
+      // 전역변수 방이름 할당
+      roomName = input.value;
+      // 초기화
+      input.value = "";
+    });
+
+    /** Socket Code  */
+    // 👉 누군가가 SocketIO를 통해 들어오면 해당 console 실행
+    socket.on("welcome", () => {
+      console.log("누군가 들어왔다!!!");
+    });
+  }
+
+  {
+    /** ======= */
+    /** Server */
+    /** ======= */
+    import http from "http";
+    import express from "express";
+    import SocketIO from "socket.io";
+
+    const app = express();
+
+    const httpServer = http.createServer(app);
+    // 👉 SocketIO 서버 생성
+    const wsServer = SocketIO(httpServer);
+
+    /** ScoketIO - Client Connection */
+    wsServer.on("connection", (socket) => {
+      // 방 생성 및 UI 실행 함수 반환
+      socket.on("join_room", (roomName, done) => {
+        socket.join(roomName);
+
+        // 👉 매개변수로 받은 함수 실행
+        done();
+
+        // 💬 Client에 "welcome"라는 이벤트 전달
+        socket.to(roomName).emit("welcome");
+      });
+    });
+
+    // 포트 설정
+    httpServer.listen(3000);
+  }
+  ```

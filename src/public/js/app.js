@@ -1,3 +1,4 @@
+// SoketIO Object
 const socket = io();
 
 /** Video Control   */
@@ -6,13 +7,11 @@ const cameraBtn = document.querySelector("#camera");
 const muteBtn = document.querySelector("#mute");
 const cameraSelect = document.querySelector("#cameras");
 
-/** Room Control  */
-const welcome = document.querySelector("#welcome");
-const call = document.querySelector("#call");
-
+/** Global Variable   */
 let myStream;
 let muted = false;
 let cameraOff = false;
+let roomName;
 
 /**
  * Stream 객체 생성 및 주입
@@ -92,7 +91,7 @@ cameraBtn.addEventListener("click", () => {
 // 음소거 버튼  Click Event
 muteBtn.addEventListener("click", () => {
   // UI처리
-  muteBtn.innerHTML = !muted ? "음소거" : "음소거 해제";
+  muteBtn.innerHTML = muted ? "음소거" : "음소거 해제";
   // 전역변수 변경
   muted = !muted;
 
@@ -105,4 +104,40 @@ muteBtn.addEventListener("click", () => {
 // 카메라 목록 Select Event
 cameraSelect.addEventListener("input", (camersSelect) => {
   getMedia(camersSelect.target.value);
+});
+
+/******************************************* */
+/***********    Room Script     ************ */
+/******************************************* */
+
+/** Room Control  */
+const welcome = document.querySelector("#welcome");
+const call = document.querySelector("#call");
+const welcomeForm = welcome.querySelector("form");
+
+/** UI init */
+call.hidden = true;
+
+// ⭐️ 시작 함수 SocketIO 마지막 인자로 넣으므로 최종적 실행 함수
+const startMedia = () => {
+  welcome.hidden = true;
+  call.hidden = false;
+  getMedia();
+};
+
+// Form 전송 버튼 클릭 시
+welcomeForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const input = welcomeForm.querySelector("input");
+  // 💬 SocketIO에 방 생성 요청
+  socket.emit("join_room", input.value, startMedia);
+  // 전역변수 방이름 할당
+  roomName = input.value;
+  // 초기화
+  input.value = "";
+});
+
+/** Socket Code  */
+socket.on("welcome", () => {
+  console.log("누군가 들어왔다!!!");
 });
