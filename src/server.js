@@ -1,6 +1,7 @@
 import http from "http";
 import express from "express";
 import SocketIO from "socket.io";
+import { off } from "process";
 
 const app = express();
 
@@ -16,12 +17,17 @@ const httpServer = http.createServer(app);
 const wsServer = SocketIO(httpServer);
 
 wsServer.on("connection", (socket) => {
-  // 방 생성 및 UI 실행 함수 반환
+  /** 방 생성 및 UI 실행 함수 반환 */
   socket.on("join_room", (roomName, done) => {
     socket.join(roomName);
     done();
     // 💬 Client에 "welcome"라는 이벤트 전달
     socket.to(roomName).emit("welcome");
+  });
+
+  /** offer 이벤트를 받은 후 해당 Room 대상자들에게 offer 전달 */
+  socket.on("offer", (offer, roomName) => {
+    socket.to(roomName).emit("offer", offer);
   });
 });
 

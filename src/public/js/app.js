@@ -12,6 +12,7 @@ let myStream;
 let muted = false;
 let cameraOff = false;
 let roomName;
+let myPeerConnection;
 
 /**
  * Stream 객체 생성 및 주입
@@ -119,10 +120,11 @@ const welcomeForm = welcome.querySelector("form");
 call.hidden = true;
 
 // ⭐️ 시작 함수 SocketIO 마지막 인자로 넣으므로 최종적 실행 함수
-const startMedia = () => {
+const startMedia = async () => {
   welcome.hidden = true;
   call.hidden = false;
-  getMedia();
+  await getMedia();
+  makeConnection();
 };
 
 // Form 전송 버튼 클릭 시
@@ -138,6 +140,33 @@ welcomeForm.addEventListener("submit", (event) => {
 });
 
 /** Socket Code  */
-socket.on("welcome", () => {
-  console.log("누군가 들어왔다!!!");
+
+// ✅ 있던 사람이 받는 SocketIO Event
+socket.on("welcome", async () => {
+  // 👉 offer를 생성함
+  const offer = await myPeerConnection.createOffer();
+  // 👉 offer를 대상에게 전달함!!
+  myPeerConnection.setLocalDescription(offer);
+
+  console.log("offer를 생성 후 서버로 전달");
+
+  // 👉 SocketIO의 Event를 통해 offer와 대상인 RoomName을 보냄
+  socket.emit("offer", offer, roomName);
 });
+
+// ✅ 처음 들어오는 사람이 받을 SocketIO Event
+socket.on("offer", (offer) => {
+  console.log("offer", offer);
+});
+
+/** RTC Code  */
+const makeConnection = () => {
+  myPeerConnection = new RTCPeerConnection();
+  /**
+   * 💬 현재 나의 Media 정보를 가져올 수 있는 함수 getTracks()를
+   *    통해 배열자료 구조로 정보를 받아온 후 RTC객체에 추가 시캬 줌
+   */
+  myStream.getTracks().forEach((track) => {
+    myPeerConnection.addTrack(track, myStream);
+  });
+};
