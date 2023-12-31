@@ -120,7 +120,7 @@ const welcomeForm = welcome.querySelector("form");
 call.hidden = true;
 
 // ⭐️ 시작 함수 SocketIO 마지막 인자로 넣으므로 최종적 실행 함수
-const startMedia = async () => {
+const initCall = async () => {
   welcome.hidden = true;
   call.hidden = false;
   await getMedia();
@@ -129,11 +129,13 @@ const startMedia = async () => {
 };
 
 // Form 전송 버튼 클릭 시
-welcomeForm.addEventListener("submit", (event) => {
+welcomeForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const input = welcomeForm.querySelector("input");
+  // ⭐️ 소켓은 매우 빠르게 생성되기에 "myPeerConnection" 객체를 찾기위해 await로 변경
+  await initCall();
   // 💬 SocketIO에 방 생성 요청
-  socket.emit("join_room", input.value, startMedia);
+  socket.emit("join_room", input.value);
   // 전역변수 방이름 할당
   roomName = input.value;
   // 초기화
@@ -157,7 +159,7 @@ socket.on("welcome", async () => {
 
 // ✅ 처음 들어오는 사람이 받을 SocketIO Event
 socket.on("offer", (offer) => {
-  console.log("offer", offer);
+  myPeerConnection.setRemoteDescription(offer);
 });
 
 /** RTC Code  */

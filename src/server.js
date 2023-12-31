@@ -17,9 +17,8 @@ const wsServer = SocketIO(httpServer);
 
 wsServer.on("connection", (socket) => {
   /** 방 생성 및 UI 실행 함수 반환 */
-  socket.on("join_room", (roomName, done) => {
+  socket.on("join_room", (roomName) => {
     socket.join(roomName);
-    done();
     // 💬 Client에 "welcome"라는 이벤트 전달
     socket.to(roomName).emit("welcome");
   });
