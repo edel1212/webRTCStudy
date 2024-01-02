@@ -148,7 +148,7 @@ welcomeForm.addEventListener("submit", async (event) => {
 socket.on("welcome", async () => {
   // 👉 offer를 생성함
   const offer = await myPeerConnection.createOffer();
-  // 👉 offer를 대상에게 전달함!!
+  // 👉 만들어진 offer를  RTC객체에 저장
   myPeerConnection.setLocalDescription(offer);
 
   console.log("offer를 생성 후 서버로 전달");
@@ -158,8 +158,21 @@ socket.on("welcome", async () => {
 });
 
 // ✅ 처음 들어오는 사람이 받을 SocketIO Event
-socket.on("offer", (offer) => {
+socket.on("offer", async (offer) => {
+  // 👉 받아온 offer를 통해 remote Description 설정
   myPeerConnection.setRemoteDescription(offer);
+  // 👉 PeerA에게 전달해줄 Answer 생성
+  const answer = await myPeerConnection.createAnswer();
+  // 👉 만들어진 Answer를 RTC객체에 저장
+  myPeerConnection.setLocalDescription(answer);
+
+  // 👉 SocketIO의 Event를 통해 answer와 대상인 RoomName을 보냄
+  socket.emit("answer", answer, roomName);
+});
+
+socket.on("answer", (answer) => {
+  // 👉 받아온 answer를 통해 remote Description 설정
+  myPeerConnection.setRemoteDescription(answer);
 });
 
 /** RTC Code  */

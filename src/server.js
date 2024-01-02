@@ -24,9 +24,13 @@ wsServer.on("connection", (socket) => {
   });
 
   /** offer 이벤트를 받은 후 해당 Room 대상자들에게 offer 전달 */
-  //
   socket.on("offer", (offer, roomName) => {
     socket.to(roomName).emit("offer", offer);
+  });
+
+  /** answer 이벤트를 받은 후 해당 Room 대상자들에게 answer 전달 */
+  socket.on("answer", (answer, roomName) => {
+    socket.to(roomName).emit("answer", answer);
   });
 });
 
