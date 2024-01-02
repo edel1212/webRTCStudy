@@ -1416,3 +1416,71 @@ cameraSelect.addEventListener("input", (camersSelect) => {
     });
   }
   ```
+
+### RTC 사용 _Step3_
+
+- `SocketIO`를 사용해 Signaling Prceess (Peer B 입장)
+- Peer B
+  - `getUserMedia()` : `myPeerConnection.setRemoteDescription(offer)`을 통해 PeerA에서 전달한 Offer를 저장
+  - `getUserMedia()` : PeerA에서 설정 했으므로 스킵
+  - `addSream()` : PeerA에서 설정 했으므로 스킵
+  - `createAnswer()` : RTC객체의 내장 함수를 통해 생성
+    - `await myPeerConnection.createAnswer()`사용
+  - `setLocalDescription()` : 만들어진 Answer를 전달해 줌 ` myPeerConnection.setLocalDescription(answer);`
+- 코드
+
+  ```javascript
+  {
+    /** Client */
+
+    /**  ====================== **/
+    // ⭐️ 중요 포인트 RTC 객체인 "myPeerConnection"는
+    //    비동기식으로 처리 시 객체가 생성되기 전에
+    //    setRemoteDescription()를 실행 해
+    //    undefined에러가 발생함 따라서 기존 코드를 아래의 코드로 변경
+    //    비동기 -> 동기 처리 [ 힘수명 변경 :: startMedia ->  initCall ]
+    const initCall = async () => {
+      // code ...
+      makeConnection();
+    };
+
+    const makeConnection = () => {
+      myPeerConnection = new RTCPeerConnection();
+    };
+    /**  ====================== **/
+
+    // ✅ PeerB가 받는 Event
+    socket.on("offer", async (offer) => {
+      // 👉 받아온 offer를 통해 remote Description 설정
+      myPeerConnection.setRemoteDescription(offer);
+      // 👉 PeerA에게 전달해줄 Answer 생성
+      const answer = await myPeerConnection.createAnswer();
+      // 👉 만들어진 Answer를 RTC객체에 저장
+      myPeerConnection.setLocalDescription(answer);
+
+      // 👉 SocketIO의 Event를 통해 answer와 대상인 RoomName을 보냄
+      socket.emit("answer", answer, roomName);
+    });
+
+    // ✅ PeerA가 받을 Event --> B가 보낸 answer를 서버를 통해 받음
+    socket.on("answer", (answer) => {
+      // 👉 받아온 answer를 통해 remote Description 설정
+      myPeerConnection.setRemoteDescription(answer);
+    });
+  }
+
+  {
+    /** Server */
+    wsServer.on("connection", (socket) => {
+      /** offer 이벤트를 받은 후 해당 Room 대상자들에게 offer 전달 */
+      socket.on("offer", (offer, roomName) => {
+        socket.to(roomName).emit("offer", offer);
+      });
+
+      /** answer 이벤트를 받은 후 해당 Room 대상자들에게 answer 전달 */
+      socket.on("answer", (answer, roomName) => {
+        socket.to(roomName).emit("answer", answer);
+      });
+    });
+  }
+  ```
