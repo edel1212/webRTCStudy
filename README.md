@@ -1421,12 +1421,20 @@ cameraSelect.addEventListener("input", (camersSelect) => {
 
 - `SocketIO`를 사용해 Signaling Prceess (Peer B 입장)
 - Peer B
+
   - `getUserMedia()` : `myPeerConnection.setRemoteDescription(offer)`을 통해 PeerA에서 전달한 Offer를 저장
   - `getUserMedia()` : PeerA에서 설정 했으므로 스킵
   - `addSream()` : PeerA에서 설정 했으므로 스킵
   - `createAnswer()` : RTC객체의 내장 함수를 통해 생성
     - `await myPeerConnection.createAnswer()`사용
   - `setLocalDescription()` : 만들어진 Answer를 전달해 줌 ` myPeerConnection.setLocalDescription(answer);`
+
+- 포인트
+
+  - PeerA와 PeerB는 서로 핑퐁하는거다.
+  - `setLocalDescription` 와 `setRemoteDescription`를 서로 해준다 라고 생각하자
+    - 각각의 대상에 따라 Offer를 넣거나 Answer를 넣거나 해주면 된다~!!
+
 - 코드
 
   ```javascript
