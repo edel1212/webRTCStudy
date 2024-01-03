@@ -146,12 +146,12 @@ welcomeForm.addEventListener("submit", async (event) => {
 
 // ✅ 있던 사람이 받는 SocketIO Event
 socket.on("welcome", async () => {
+  console.log(" [1] Peer A :: 누군가 들어옴 offer 생성");
+
   // 👉 offer를 생성함
   const offer = await myPeerConnection.createOffer();
   // 👉 만들어진 offer를  RTC객체에 저장
   myPeerConnection.setLocalDescription(offer);
-
-  console.log("offer를 생성 후 서버로 전달");
 
   // 👉 SocketIO의 Event를 통해 offer와 대상인 RoomName을 보냄
   socket.emit("offer", offer, roomName);
@@ -159,6 +159,8 @@ socket.on("welcome", async () => {
 
 // ✅ 처음 들어오는 사람이 받을 SocketIO Event
 socket.on("offer", async (offer) => {
+  console.log(" [2] Peer B :: offer를 받음!! -> answer 생성");
+
   // 👉 받아온 offer를 통해 remote Description 설정
   myPeerConnection.setRemoteDescription(offer);
   // 👉 PeerA에게 전달해줄 Answer 생성
@@ -171,6 +173,8 @@ socket.on("offer", async (offer) => {
 });
 
 socket.on("answer", (answer) => {
+  console.log(" [3] Peer A :: answer을 받음!!");
+
   // 👉 받아온 answer를 통해 remote Description 설정
   myPeerConnection.setRemoteDescription(answer);
 });
@@ -178,6 +182,12 @@ socket.on("answer", (answer) => {
 /** RTC Code  */
 const makeConnection = () => {
   myPeerConnection = new RTCPeerConnection();
+
+  myPeerConnection.addEventListener("icecandidate", (data) => {
+    console.log(" [4] offer와 answer 서로 remote 시 icecandidate 접근 확인");
+    console.log(data);
+  });
+
   /**
    * 💬 현재 나의 Media 정보를 가져올 수 있는 함수 getTracks()를
    *    통해 배열자료 구조로 정보를 받아온 후 RTC객체에 추가 시캬 줌
