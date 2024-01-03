@@ -32,6 +32,11 @@ wsServer.on("connection", (socket) => {
   socket.on("answer", (answer, roomName) => {
     socket.to(roomName).emit("answer", answer);
   });
+
+  /** 각각의 Peer A, B에서 만든 Icecandidate를 교환 */
+  socket.on("ice", (ice, roomName) => {
+    socket.to(roomName).emit("ice", ice);
+  });
 });
 
 // 포트 설정

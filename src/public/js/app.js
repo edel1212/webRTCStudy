@@ -179,13 +179,17 @@ socket.on("answer", (answer) => {
   myPeerConnection.setRemoteDescription(answer);
 });
 
+// TODO socket.on ice
+
 /** RTC Code  */
 const makeConnection = () => {
   myPeerConnection = new RTCPeerConnection();
 
+  // 💬 icecandidate 이벤트 생성
   myPeerConnection.addEventListener("icecandidate", (data) => {
     console.log(" [4] offer와 answer 서로 remote 시 icecandidate 접근 확인");
-    console.log(data);
+    // 👉 Peer A,B가 서로 icecandidate를 주고 받게 해 줌
+    socket.emit("ice", data.candidate, roomName);
   });
 
   /**
