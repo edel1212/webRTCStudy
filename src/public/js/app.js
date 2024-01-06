@@ -177,6 +177,7 @@ socket.on("answer", (answer) => {
 
   // 👉 받아온 answer를 통해 remote Description 설정
   myPeerConnection.setRemoteDescription(answer);
+  //
 });
 
 // TODO socket.on ice
