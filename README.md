@@ -1692,4 +1692,6 @@ cameraSelect.addEventListener("input", (camersSelect) => {
 - 간략 설명
   - RTC의 가장 포인트는 Peer to Peer 이다 (P2P 통신)
     - 중간 연결만 해주면 사용자 끼리 주고 받기에 서버의 부하가 적다
-    - 피어간 직접 통신을 가능하게 함
+      - 피어간 직접 통신을 가능하게 함
+    - RTC의 흐름은 간단하다
+      - PeerA 와 PeerB가 각각의 A는 Offer B는 Answer를 생성하여 주고 받은 후 Icecandidate를 통해 주고 연결을 맺는 것이다.
