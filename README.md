@@ -1496,6 +1496,50 @@ cameraSelect.addEventListener("input", (camersSelect) => {
 ### RTC 사용 _Step4_
 
 - `ICE Candidate`연결 [인터넷 연결 생성]
-  - PeerA 와 PeerB에서 각각의 offer와 answer을 가진 후 해당 프로토콜을 실행한다.
   - webRTC에 필요한 프로토콜들을 의미한다. (브라우저가 서로 소통할 수 있게 해주는 방법)
   - 다수의 후보(candidate)들이 가각의 연결에서 제안되고 그것을 소통 방식에 사용한다.
+  - 흐름
+    - PeerA 와 PeerB에서 각각의 offer와 answer을 가진 후 해당 `ICEcandidate` 프로토콜을 실행한다.
+    - RTC내부 함수(icecandidate)를 통해 실행하면 받아온 매개변수에서 candidate데이터를 서버를 통해 전달 **[전달]**
+    - 서버를 통해 전달 받은 ICEcandidate데이터를 RTC객체에 저장 **[받기]**
+    - RTC내부 함수(addstream)를 사용해 각각의 전달받은 stream데이터를 video 객체에 사용
+- 코드
+
+  ```javascript
+  {
+    /** Client*/
+
+    /** RTC Code  */
+    const makeConnection = () => {
+      myPeerConnection = new RTCPeerConnection();
+
+      // ... code ...
+      /** ✨ [1] ~ [3]까지의 과정은 PeerA - PeerB가 서로 offer  와 Answer를 주고 받는 과정임 */
+
+      // 💬 icecandidate 이벤트 생성
+      myPeerConnection.addEventListener("icecandidate", (data) => {
+        console.log(
+          " [4] offer와 answer 서로 remote 시 icecandidate 접근 확인"
+        );
+        // 👉 Peer A,B가 서로 icecandidate를 주고 받게 해 줌 [ 보내기 ]
+        socket.emit("ice", data.candidate, roomName);
+      });
+
+      // 💬  addstream 이벤트 생성
+      myPeerConnection.addEventListener("addstream", (data) => {
+        console.log(" [6] 각각의 iceCandidate 교환 완교!!! 스트리밍 교환 시작");
+        // ⭐️ 각각의 log의 스트링이 반대편 대상의 streamId가 같은걸 볼 수 있다!!
+        console.log("Peer Stream :::", data.stream.id);
+        console.log("my Stream :::", myStream.id);
+
+        const peerFace = document.querySelector("#peerFace");
+
+        console.log(" [7] 전달받은 stream을 보여줄 화면에 출력");
+        peersStream.srcObject = data.stream;
+      });
+    };
+  }
+  {
+    /** Server */
+  }
+  ```

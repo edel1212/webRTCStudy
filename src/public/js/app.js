@@ -213,6 +213,6 @@ const makeConnection = () => {
     console.log("my Stream :::", myStream.id);
 
     const peerFace = document.querySelector("#peerFace");
-    peerFace.srcObject = data.stream;
+    peersStream.srcObject = data.stream;
   });
 };
