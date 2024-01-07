@@ -1549,3 +1549,66 @@ cameraSelect.addEventListener("input", (camersSelect) => {
     });
   }
   ```
+
+### 카메라 변경 시 상대방 연결 안되는 Issue
+
+- 해당 원인은 카메라를 바꿀때마다 새로운 Stream을 만들기 때문이다.
+
+  - 클라이언트 측 code를 살펴보면 `getMedia(camersSelect.target.value);`를 통해 해당 함수로 Stream을 새로 만들어 줌
+
+    ```javascript
+    async function getMedia(deviceId) {
+      // 카메라 ❌
+      const initalConstrains = {
+        audio: true,
+        video: { facingMode: "user" },
+      };
+      // 카메라 👌
+      const cameraConstrains = {
+        audio: true,
+        video: {
+          deviceId: { exact: deviceId },
+        },
+      };
+
+      try {
+        myStream = await navigator.mediaDevices.getUserMedia(
+          // 삼항 사용
+          deviceId ? cameraConstrains : initalConstrains
+        );
+        // 스트림 객체 주입
+        myFace.srcObject = myStream;
+
+        // 최초 한번 실행 - deviceId가 없을 경우에만 그려줌
+        if (!deviceId) await getCameras();
+      } catch (error) {
+        console.log(error);
+      } // try - catch
+    }
+    ```
+
+- 코드
+
+  ```javascript
+  {
+    /** Client */
+
+    // 카메라 목록 Select Event
+    cameraSelect.addEventListener("input", (camersSelect) => {
+      getMedia(camersSelect.target.value);
+
+      // ⭐️ myPeerConnection이 있을 경우에 Track을 repleace 해준다!
+      if (myPeerConnection) {
+        // 👉 sender를 통해 보냈던 Track들을 컨트롤 할 수 있다
+        const videoSender = myPeerConnection
+          .getSender() // sender를 통해 보낸 정보를 가져옴
+          .find((sender) => sender.track.kind === "video"); //video만 필터링
+
+        // 👉 새로 만들어진 stream의 trak을 가져옴
+        const videoTrack = myStream.getVideoTracks()[0];
+        // 👉 RTC의 객체에서 sender를 통사용해 Track을 Replace 해줌
+        videoSender.replaceTrack(videoTrack);
+      }
+    });
+  }
+  ```

@@ -74,8 +74,6 @@ const getCameras = async () => {
   } // try - catch
 };
 
-//getMedia();
-
 // 카메라 설정 Click Event
 cameraBtn.addEventListener("click", () => {
   // UI처라
@@ -105,6 +103,18 @@ muteBtn.addEventListener("click", () => {
 // 카메라 목록 Select Event
 cameraSelect.addEventListener("input", (camersSelect) => {
   getMedia(camersSelect.target.value);
+
+  if (myPeerConnection) {
+    // 👉 sender를 통해 보냈던 Track들을 컨트롤 할 수 있다
+    const videoSender = myPeerConnection
+      .getSender()
+      .find((sender) => sender.track.kind === "video");
+
+    // 👉 새로 만들어진 stream의 trak을 가져옴
+    const videoTrack = myStream.getVideoTracks()[0];
+    // 👉 RTC의 객체에서 sender를 통사용해 Track을 Replace 해줌
+    videoSender.replaceTrack(videoTrack);
+  }
 });
 
 /******************************************* */
