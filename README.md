@@ -1645,5 +1645,10 @@ cameraSelect.addEventListener("input", (camersSelect) => {
     - RTC자체가 mesh(망사) 구조 이기 떄문이다. 여러개면 업로드, 업데이트 N번이 일어남 (단 해당 문제는 오디오나 영상을 다룰때만 발생한다)
     - 대안 : SFU(Selectiove Fowarding Unit) 서버를 둬서 중앙에서 한번에 스트림을 압축하여 내보내는 역할을 한다.
 - 간략 설명
-  - RTC의 가장 포인트는 Peer to Peer 이다
+  - RTC의 가장 포인트는 Peer to Peer 이다 (P2P 통신)
     - 중간 연결만 해주면 사용자 끼리 주고 받기에 서버의 부하가 적다
+    - 피어간 직접 통신을 가능하게 함
+
+###
+
+- Offer를 만드는 주체가 Data Channel을 생성하는 주체가 되어야한다.

@@ -12,7 +12,10 @@ let myStream;
 let muted = false;
 let cameraOff = false;
 let roomName;
+// webRTC객체 변수
 let myPeerConnection;
+// DataChannel 변수
+let myDataChannel;
 
 /**
  * Stream 객체 생성 및 주입
@@ -156,8 +159,13 @@ welcomeForm.addEventListener("submit", async (event) => {
 
 // ✅ 있던 사람이 받는 SocketIO Event
 socket.on("welcome", async () => {
-  console.log(" [1] Peer A :: 누군가 들어옴 offer 생성");
+  console.log("-----------------------------");
+  console.log(" [DataChannel.1 ] Peer A :: DataChnnel 생성");
+  myDataChannel = myPeerConnection.createDataChannel("chat");
+  myDataChannel.addEventListener("message", console.log);
+  console.log("-----------------------------");
 
+  console.log(" [1] Peer A :: 누군가 들어옴 offer 생성");
   // 👉 offer를 생성함
   const offer = await myPeerConnection.createOffer();
   // 👉 만들어진 offer를  RTC객체에 저장
@@ -169,8 +177,15 @@ socket.on("welcome", async () => {
 
 // ✅ 처음 들어오는 사람이 받을 SocketIO Event
 socket.on("offer", async (offer) => {
-  console.log(" [2] Peer B :: offer를 받음!! -> answer 생성");
+  console.log("-----------------------------");
+  console.log(" [DataChannel.2 ] Peer B :: DataChnnel를 받음");
+  myPeerConnection.addEventListener("datachannel", (event) => {
+    myDataChannel = event.channel;
+    myDataChannel.addEventListener("message", console.log);
+  });
+  console.log("-----------------------------");
 
+  console.log(" [2] Peer B :: offer를 받음!! -> answer 생성");
   // 👉 받아온 offer를 통해 remote Description 설정
   myPeerConnection.setRemoteDescription(offer);
   // 👉 PeerA에게 전달해줄 Answer 생성
@@ -238,5 +253,3 @@ const makeConnection = () => {
     peerFace.srcObject = data.stream;
   });
 };
-
-### ETC
