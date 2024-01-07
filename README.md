@@ -1492,3 +1492,10 @@ cameraSelect.addEventListener("input", (camersSelect) => {
     });
   }
   ```
+
+### RTC 사용 _Step4_
+
+- `ICE Candidate`연결 [인터넷 연결 생성]
+  - PeerA 와 PeerB에서 각각의 offer와 answer을 가진 후 해당 프로토콜을 실행한다.
+  - webRTC에 필요한 프로토콜들을 의미한다. (브라우저가 서로 소통할 수 있게 해주는 방법)
+  - 다수의 후보(candidate)들이 가각의 연결에서 제안되고 그것을 소통 방식에 사용한다.

@@ -180,18 +180,15 @@ socket.on("answer", (answer) => {
   //
 });
 
-// TODO socket.on ice
+socket.on("ice", (ice) => {
+  console.log(" [5] Peer A, B :: 각각의 서로가 보내준 ice를 RTC객체에 추가");
+  // 👉 RTC객체에 서버를 통해 전달받은 icecandidate를 추가 [ 받기 ]
+  myPeerConnection.addIceCandidate(ice);
+});
 
 /** RTC Code  */
 const makeConnection = () => {
   myPeerConnection = new RTCPeerConnection();
-
-  // 💬 icecandidate 이벤트 생성
-  myPeerConnection.addEventListener("icecandidate", (data) => {
-    console.log(" [4] offer와 answer 서로 remote 시 icecandidate 접근 확인");
-    // 👉 Peer A,B가 서로 icecandidate를 주고 받게 해 줌
-    socket.emit("ice", data.candidate, roomName);
-  });
 
   /**
    * 💬 현재 나의 Media 정보를 가져올 수 있는 함수 getTracks()를
@@ -199,5 +196,23 @@ const makeConnection = () => {
    */
   myStream.getTracks().forEach((track) => {
     myPeerConnection.addTrack(track, myStream);
+  });
+
+  // 💬 icecandidate 이벤트 생성
+  myPeerConnection.addEventListener("icecandidate", (data) => {
+    console.log(" [4] offer와 answer 서로 remote 시 icecandidate 접근 확인");
+    // 👉 Peer A,B가 서로 icecandidate를 주고 받게 해 줌 [ 보내기 ]
+    socket.emit("ice", data.candidate, roomName);
+  });
+
+  // 💬  addstream 이벤트 생성
+  myPeerConnection.addEventListener("addstream", (data) => {
+    console.log(" [6] 각각의 iceCandidate 교환 완교!!! 스트리밍 교환 시작");
+    // ⭐️ 각각의 log의 스트링이 반대편 대상의 streamId가 같은걸 볼 수 있다!!
+    console.log("Peer Stream :::", data.stream.id);
+    console.log("my Stream :::", myStream.id);
+
+    const peerFace = document.querySelector("#peerFace");
+    peerFace.srcObject = data.stream;
   });
 };
