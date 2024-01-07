@@ -198,7 +198,19 @@ socket.on("ice", (ice) => {
 
 /** RTC Code  */
 const makeConnection = () => {
-  myPeerConnection = new RTCPeerConnection();
+  myPeerConnection = new RTCPeerConnection({
+    iceServers: [
+      {
+        urls: [
+          "stun:stun.l.google.com:19302",
+          "stun:stun1.l.google.com:19302",
+          "stun:stun2.l.google.com:19302",
+          "stun:stun3.l.google.com:19302",
+          "stun:stun4.l.google.com:19302",
+        ],
+      },
+    ],
+  });
 
   /**
    * 💬 현재 나의 Media 정보를 가져올 수 있는 함수 getTracks()를
@@ -223,6 +235,6 @@ const makeConnection = () => {
     console.log("my Stream :::", myStream.id);
 
     const peerFace = document.querySelector("#peerFace");
-    peersStream.srcObject = data.stream;
+    peerFace.srcObject = data.stream;
   });
 };

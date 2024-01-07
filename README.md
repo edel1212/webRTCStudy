@@ -1612,3 +1612,24 @@ cameraSelect.addEventListener("input", (camersSelect) => {
     });
   }
   ```
+
+### STUN Server
+
+- 어떤것을 request 시 누군지 알려줄 수 있는 서버라고 생각하자
+- STUN 서버를 구현해야하지만 테스트만 할 예정이미로 Google의 STUN Server를 사용
+- 코드
+  ```javascript
+  myPeerConnection = new RTCPeerConnection({
+    iceServers: [
+      {
+        urls: [
+          "stun:stun.l.google.com:19302",
+          "stun:stun1.l.google.com:19302",
+          "stun:stun2.l.google.com:19302",
+          "stun:stun3.l.google.com:19302",
+          "stun:stun4.l.google.com:19302",
+        ],
+      },
+    ],
+  });
+  ```
