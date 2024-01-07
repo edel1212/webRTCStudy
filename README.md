@@ -1634,6 +1634,51 @@ cameraSelect.addEventListener("input", (camersSelect) => {
   });
   ```
 
+### DataChannel
+
+- 중요 포인트
+  - Offer를 만드는 주체가 DataChannel을 생성해줘야한다.
+  - 이후 PeerB 입장에서는 PeerA에서 만든 DataChannel을 사용하면 된다.
+- 순서
+  - 1 . DataChennel 객체 생성 및 [PeerA]
+  - 2 . DataChennel객체에 메세지가 올 경우 받을 이벤트 추가 [PeerA]
+  - 3 . RTC객체에 datachannel감지 이벤트 추가 [PeerB]
+  - 4 . DataChennel 객체를 주입 (매개변수) [PeerB]
+  - 2 . DataChennel객체에 메세지가 올 경우 받을 이벤트 추가 [PeerB]
+- 코드
+
+  ```javascript
+  {
+    /** Client */
+
+    // Peer A 실행
+    socket.on("welcome", async () => {
+      console.log(" [DataChannel.1 ] Peer A :: DataChnnel 생성");
+
+      myDataChannel = myPeerConnection.createDataChannel("chat");
+      // 💬 해당 채널로 Message를 받으면 아래의 로그가 출력
+      myDataChannel.addEventListener("message", console.log);
+
+      // offer 생성  code.....
+    });
+
+    // Peer B 실행
+    socket.on("offer", async (offer) => {
+      console.log(" [DataChannel.2 ] Peer B :: DataChnnel를 받음");
+
+      // 👉 RTC객체 내 datachannel로 PeerA에서 전달한  채널 감지
+      myPeerConnection.addEventListener("datachannel", (event) => {
+        // 👉 Peer A 전달한 채널을 주입하여 사용
+        myDataChannel = event.channel;
+        // 💬 해당 채널로 Message를 받으면 아래의 로그가 출력
+        myDataChannel.addEventListener("message", console.log);
+      });
+
+      // offer 저장 및 answer 생성 ...
+    });
+  }
+  ```
+
 ### 후기
 
 - 추가로 알아두면 좋은 것
@@ -1648,7 +1693,3 @@ cameraSelect.addEventListener("input", (camersSelect) => {
   - RTC의 가장 포인트는 Peer to Peer 이다 (P2P 통신)
     - 중간 연결만 해주면 사용자 끼리 주고 받기에 서버의 부하가 적다
     - 피어간 직접 통신을 가능하게 함
-
-###
-
-- Offer를 만드는 주체가 Data Channel을 생성하는 주체가 되어야한다.

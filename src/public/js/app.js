@@ -162,6 +162,7 @@ socket.on("welcome", async () => {
   console.log("-----------------------------");
   console.log(" [DataChannel.1 ] Peer A :: DataChnnel 생성");
   myDataChannel = myPeerConnection.createDataChannel("chat");
+  // 💬 해당 채널로 Message를 받으면 아래의 로그가 출력
   myDataChannel.addEventListener("message", console.log);
   console.log("-----------------------------");
 
@@ -180,7 +181,9 @@ socket.on("offer", async (offer) => {
   console.log("-----------------------------");
   console.log(" [DataChannel.2 ] Peer B :: DataChnnel를 받음");
   myPeerConnection.addEventListener("datachannel", (event) => {
+    // 👉 Peer A 전달한 채널을 주입하여 사용
     myDataChannel = event.channel;
+    // 💬 해당 채널로 Message를 받으면 아래의 로그가 출력
     myDataChannel.addEventListener("message", console.log);
   });
   console.log("-----------------------------");
