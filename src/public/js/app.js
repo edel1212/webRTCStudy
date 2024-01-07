@@ -238,3 +238,5 @@ const makeConnection = () => {
     peerFace.srcObject = data.stream;
   });
 };
+
+### ETC
