@@ -1541,5 +1541,11 @@ cameraSelect.addEventListener("input", (camersSelect) => {
   }
   {
     /** Server */
+    wsServer.on("connection", (socket) => {
+      /** 각각의 Peer A, B에서 만든 Icecandidate를 교환 */
+      socket.on("ice", (ice, roomName) => {
+        socket.to(roomName).emit("ice", ice);
+      });
+    });
   }
   ```
